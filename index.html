@@ -1,0 +1,850 @@
+<!doctype html>
+<html lang="zh-CN">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width,initial-scale=1,viewport-fit=cover">
+<title>在线卡卡颂 · 双人联机 Demo</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=Cinzel:wght@500;700&family=Noto+Serif+SC:wght@400;600;800&display=swap" rel="stylesheet">
+<style>
+:root{
+  --table:#1b2530; --table-hi:#27374a; --panel:#222e3b; --card:#2c3a4a; --line:#41536a;
+  --linen:#ece6d4; --muted:#a3afb8; --gold:#d9b45a; --gold-ink:#2a2112;
+  --red:#c4452f; --blue:#4a7bc0;
+  --serif:'Noto Serif SC','Songti SC','STSong','SimSun',serif;
+  --disp:'Cinzel','Noto Serif SC',serif;
+  color-scheme:dark;
+}
+*{box-sizing:border-box}
+[hidden]{display:none!important}
+html,body{height:100%;margin:0}
+body{background:var(--table);color:var(--linen);font-family:var(--serif);line-height:1.65;overflow:hidden;-webkit-font-smoothing:antialiased}
+button{font:inherit;color:inherit;cursor:pointer}
+:focus-visible{outline:2px solid var(--gold);outline-offset:2px}
+
+/* ---------- 布局 ---------- */
+#app{position:fixed;inset:0;display:grid;grid-template-columns:minmax(0,1fr) 330px}
+#stage{position:relative;overflow:hidden;background:radial-gradient(900px 600px at 45% 40%,var(--table-hi),var(--table) 75%)}
+#stage::before{content:"";position:absolute;inset:0;background-image:radial-gradient(rgba(236,230,212,.05) 1px,transparent 1.2px);background-size:30px 30px;pointer-events:none}
+#board{position:relative;width:100%;height:100%;display:block;touch-action:none;cursor:grab;user-select:none;-webkit-user-select:none}
+#board:active{cursor:grabbing}
+#toast{position:absolute;left:50%;top:16px;transform:translateX(-50%);max-width:min(92%,420px);background:var(--panel);border:1px solid var(--gold);color:var(--linen);padding:8px 16px;border-radius:6px;font-size:14px;white-space:pre-line;text-align:center;pointer-events:none;opacity:0;transition:opacity .18s}
+#toast.on{opacity:1}
+
+/* ---------- 棋盘叠层 ---------- */
+.cell{pointer-events:none}
+.cell.ok{fill:rgba(217,180,90,.2);stroke:var(--gold);stroke-width:3;stroke-dasharray:8 6}
+.cell.alt{fill:none;stroke:var(--gold);stroke-opacity:.32;stroke-width:2;stroke-dasharray:3 7}
+.cell.bad{fill:rgba(196,69,47,.18);stroke:#d9654f;stroke-width:3}
+.cell.pick{fill:none;stroke:var(--gold);stroke-width:4}
+.lastT{fill:none;stroke:var(--gold);stroke-width:3;stroke-opacity:.75;pointer-events:none}
+.anc{cursor:pointer}
+.ancC{fill:rgba(255,244,214,.3);stroke:#fff4d6;stroke-width:2;stroke-dasharray:4 3}
+.anc:hover .ancC{fill:rgba(255,244,214,.62)}
+
+/* ---------- 侧栏 ---------- */
+#panel{background:var(--panel);border-left:1px solid var(--line);display:flex;flex-direction:column;gap:14px;padding:16px 16px calc(16px + env(safe-area-inset-bottom));overflow:hidden;min-height:0}
+.brand{display:flex;align-items:center;justify-content:space-between;gap:8px}
+.brand h1{margin:0;font-size:20px;font-weight:800;letter-spacing:.12em}
+.net{display:inline-flex;align-items:center;gap:6px;font-size:12px;color:var(--muted);border:1px solid var(--line);border-radius:999px;padding:1px 10px;white-space:nowrap}
+.net::before{content:"";width:7px;height:7px;border-radius:50%;background:var(--muted)}
+.net.ok::before{background:#7bc47f}
+.net.bad::before{background:#d9654f}
+#players{display:grid;gap:8px}
+.pl{background:var(--card);border-left:5px solid var(--pc);padding:8px 12px;border-radius:0 6px 6px 0}
+.pl.on{box-shadow:inset 0 0 0 1px var(--gold);background:#334456}
+.plTop{display:flex;align-items:baseline;justify-content:space-between}
+.plName{font-weight:600}
+.plName em{font-style:normal;font-size:12px;color:var(--gold);margin-left:8px;border:1px solid var(--gold);border-radius:3px;padding:0 5px}
+.plScore{font-family:var(--disp);font-weight:700;font-size:30px;line-height:1.1}
+.plM{display:flex;gap:2px;margin-top:2px}
+.mi{width:18px;height:22px}
+.mi.used{opacity:.22}
+.hand{display:flex;gap:14px;align-items:center}
+#prev{width:116px;height:116px;flex:none;background:rgba(0,0,0,.18);border-radius:6px}
+.handInfo{display:grid;gap:8px;justify-items:start}
+#deckCnt{font-size:14px;color:var(--muted)}
+#hint{margin:0;font-size:14px;color:var(--linen);min-height:3.3em}
+.actions{display:flex;gap:8px;flex-wrap:wrap}
+.btn,.primary,.ghost{border:1px solid var(--gold);background:transparent;border-radius:6px;padding:6px 14px;transition:background .15s}
+.btn:hover,.ghost:hover{background:rgba(217,180,90,.16)}
+.primary{background:var(--gold);color:var(--gold-ink);font-weight:600}
+.primary:hover{background:#e6c46d}
+.ghost{border-color:var(--line)}
+button:disabled{opacity:.4;cursor:default}
+#log{list-style:none;margin:0;padding:0;overflow:auto;flex:1;min-height:60px;font-size:13px;color:var(--muted);border-top:1px solid var(--line)}
+#log li{padding:4px 0;border-bottom:1px solid rgba(65,83,106,.5)}
+#log li:first-child{color:var(--linen)}
+
+/* ---------- 大厅 ---------- */
+#lobby{position:fixed;inset:0;z-index:20;background:radial-gradient(1000px 700px at 70% 45%,var(--table-hi),var(--table) 75%);display:grid;place-items:center;padding:24px;overflow:auto}
+.lobbyIn{width:min(1040px,100%);display:grid;grid-template-columns:minmax(0,1fr) minmax(0,1fr);gap:40px;align-items:center}
+.logo{margin:0 0 12px;font-size:clamp(40px,7vw,68px);font-weight:800;letter-spacing:.14em;line-height:1.15}
+.lead{margin:0 0 24px;max-width:30em;color:var(--muted)}
+#lobbyMain{display:grid;gap:12px;justify-items:start}
+.join{display:flex;gap:8px}
+.join input{width:9em;background:rgba(0,0,0,.25);border:1px solid var(--line);border-radius:6px;color:var(--linen);font-family:var(--disp);font-size:18px;letter-spacing:.2em;text-transform:uppercase;padding:6px 12px}
+.waitLbl{margin:0;color:var(--muted)}
+.code{font-family:var(--disp);font-weight:700;font-size:56px;letter-spacing:.22em;color:var(--gold);line-height:1.2}
+#waitMsg{margin:4px 0 14px;color:var(--muted)}
+.row{display:flex;gap:10px;flex-wrap:wrap}
+.err{min-height:1.6em;margin:12px 0 0;color:#e58a76}
+.fine{margin:18px 0 0;font-size:12.5px;color:var(--muted);max-width:38em}
+#hero{width:100%;height:auto;max-height:70vh;filter:drop-shadow(0 18px 30px rgba(0,0,0,.45))}
+
+/* ---------- 弹窗 ---------- */
+#endModal{position:fixed;inset:0;z-index:30;background:rgba(10,16,22,.72);display:grid;place-items:center;padding:20px}
+#endModal .card{background:var(--panel);border:1px solid var(--gold);border-radius:8px;padding:24px 28px;width:min(420px,100%);text-align:center}
+#endModal h2{margin:0 0 12px;font-size:26px;letter-spacing:.1em}
+.endRow{display:flex;justify-content:space-between;align-items:baseline;padding:8px 14px;margin:6px 0;background:var(--card);border-left:5px solid var(--pc);border-radius:0 6px 6px 0}
+.endRow b{font-family:var(--disp);font-size:28px}
+#endNote{color:var(--muted);font-size:13px;margin:12px 0 0}
+
+/* ---------- 窄屏 ---------- */
+@media (max-width:820px){
+  .lobbyIn{grid-template-columns:1fr;gap:20px}
+  #hero{max-height:34vh}
+  #app{grid-template-columns:1fr;grid-template-rows:minmax(0,1fr) auto}
+  #panel{border-left:0;border-top:1px solid var(--line);padding:10px 12px calc(10px + env(safe-area-inset-bottom));gap:8px;display:grid;grid-template-columns:minmax(0,1fr) auto;align-items:start}
+  .brand,#log{display:none}
+  #players{grid-column:1;grid-template-columns:1fr 1fr}
+  .plScore{font-size:24px}
+  .mi{width:12px;height:15px}
+  .hand{grid-column:2;grid-row:1/4;flex-direction:column;gap:6px}
+  #prev{width:88px;height:88px}
+  #hint{grid-column:1;font-size:13px;min-height:0}
+  .actions{grid-column:1}
+}
+@media (prefers-reduced-motion:reduce){*{transition:none!important}}
+</style>
+</head>
+<body>
+<div id="app">
+  <main id="stage">
+    <svg id="board" xmlns="http://www.w3.org/2000/svg" role="img" aria-label="游戏棋盘">
+      <defs id="defs"></defs>
+      <g id="world">
+        <g id="gTiles"></g>
+        <g id="gMeeples"></g>
+        <g id="gOverlay"></g>
+      </g>
+    </svg>
+    <div id="toast" role="status"></div>
+  </main>
+  <aside id="panel">
+    <div class="brand"><h1>在线卡卡颂</h1><span id="net" class="net">未连接</span></div>
+    <section id="players"></section>
+    <section class="hand">
+      <svg id="prev" viewBox="-6 -6 112 112" aria-label="当前地块"></svg>
+      <div class="handInfo">
+        <div id="deckCnt"></div>
+        <button id="btnRot" class="btn" type="button">旋转（R）</button>
+      </div>
+    </section>
+    <p id="hint"></p>
+    <div class="actions">
+      <button id="btnSkip" class="btn" type="button">不放随从</button>
+      <button id="btnFit" class="ghost" type="button">回到中心</button>
+    </div>
+    <ol id="log"></ol>
+  </aside>
+</div>
+
+<section id="lobby">
+  <div class="lobbyIn">
+    <div>
+      <h1 class="logo">在线卡卡颂</h1>
+      <p class="lead">两人联机的拼图城邦。一人创建房间，把房间号发给对方，对方输入后立即开局。</p>
+      <div id="lobbyMain">
+        <button id="btnHost" class="primary" type="button">创建房间</button>
+        <div class="join">
+          <input id="inCode" maxlength="5" placeholder="房间号" autocomplete="off" spellcheck="false" aria-label="房间号">
+          <button id="btnJoin" class="btn" type="button">加入房间</button>
+        </div>
+        <button id="btnLocal" class="ghost" type="button">同屏双人（同一设备轮流）</button>
+      </div>
+      <div id="lobbyWait" hidden>
+        <p class="waitLbl">房间号</p>
+        <div id="roomCode" class="code">-----</div>
+        <p id="waitMsg">正在连接…</p>
+        <div class="row">
+          <button id="btnCopy" class="btn" type="button">复制邀请链接</button>
+          <button id="btnCancel" class="ghost" type="button">取消</button>
+        </div>
+      </div>
+      <p id="lobbyErr" class="err" role="alert"></p>
+      <p class="fine">Demo v0.1：已包含道路、城市、修道院与终局结算，暂未包含农夫（田野）计分。这是非官方同人实现，所有美术均为原创。</p>
+    </div>
+    <svg id="hero" xmlns="http://www.w3.org/2000/svg" aria-hidden="true"></svg>
+  </div>
+</section>
+
+<div id="endModal" hidden>
+  <div class="card">
+    <h2 id="endTitle"></h2>
+    <div id="endScores"></div>
+    <div class="row" style="justify-content:center;margin-top:16px">
+      <button id="btnAgain" class="primary" type="button">再来一局</button>
+      <button id="btnHome" class="ghost" type="button">返回大厅</button>
+    </div>
+    <p id="endNote"></p>
+  </div>
+</div>
+
+<script src="https://cdn.jsdelivr.net/npm/peerjs@1.5.4/dist/peerjs.min.js"></script>
+<script>
+'use strict';
+/* =====================================================================
+ * 常量与地块数据
+ * 边序：0=北 1=东 2=南 3=西；边类型 C=城市 R=道路 F=田野
+ * cities / roads：每个子数组是一个"要素"所连通的边（顺时针旋转前的朝向）
+ * 单边道路 = 终止于本地块（村庄/路口/修道院）
+ * ===================================================================== */
+const DX=[0,1,0,-1], DY=[-1,0,1,0];
+const MID=[[50,0],[100,50],[50,100],[0,50]];
+const PCOL=['#c4452f','#4a7bc0'], PNAME=['红方','蓝方'];
+const KN={city:'城市',road:'道路',mon:'修道院'};
+
+const T={
+  A:{n:2,e:'FFRF',roads:[[2]],mon:1},
+  B:{n:4,e:'FFFF',mon:1},
+  C:{n:1,e:'CCCC',cities:[[0,1,2,3]],shield:1},
+  D:{n:4,e:'CRFR',cities:[[0]],roads:[[1,3]]},
+  E:{n:5,e:'CFFF',cities:[[0]]},
+  F:{n:2,e:'FCFC',cities:[[1,3]],shield:1},
+  G:{n:1,e:'CFCF',cities:[[0,2]]},
+  H:{n:3,e:'CFCF',cities:[[0],[2]]},
+  I:{n:2,e:'CCFF',cities:[[0],[1]],narrow:1},
+  J:{n:3,e:'CRRF',cities:[[0]],roads:[[1,2]]},
+  K:{n:3,e:'CFRR',cities:[[0]],roads:[[2,3]]},
+  L:{n:3,e:'CRRR',cities:[[0]],roads:[[1],[2],[3]]},
+  M:{n:2,e:'CFFC',cities:[[0,3]],shield:1},
+  N:{n:3,e:'CFFC',cities:[[0,3]]},
+  O:{n:2,e:'CRRC',cities:[[0,3]],roads:[[1,2]],shield:1},
+  P:{n:3,e:'CRRC',cities:[[0,3]],roads:[[1,2]]},
+  Q:{n:1,e:'CCFC',cities:[[0,1,3]],shield:1},
+  R:{n:3,e:'CCFC',cities:[[0,1,3]]},
+  S:{n:2,e:'CCRC',cities:[[0,1,3]],roads:[[2]],shield:1},
+  T:{n:1,e:'CCRC',cities:[[0,1,3]],roads:[[2]]},
+  U:{n:8,e:'RFRF',roads:[[0,2]]},
+  V:{n:9,e:'FFRR',roads:[[2,3]]},
+  W:{n:4,e:'FRRR',roads:[[1],[2],[3]]},
+  X:{n:1,e:'RRRR',roads:[[0],[1],[2],[3]]}
+};
+
+const $=id=>document.getElementById(id);
+const clamp=(v,a,b)=>Math.max(a,Math.min(b,v));
+function mulberry32(a){return function(){a|=0;a=a+0x6D2B79F5|0;let t=Math.imul(a^a>>>15,1|a);t=t+Math.imul(t^t>>>7,61|t)^t;return((t^t>>>14)>>>0)/4294967296}}
+function rotPt(p,r){let x=p[0],y=p[1];for(let i=0;i<r;i++){const nx=100-y;y=x;x=nx}return [x,y]}
+
+/* ---------- 要素的锚点（放随从的位置）与盾牌位置 ---------- */
+function anchorOf(f){
+  if(f.kind==='mon') return [50,50];
+  const n=f.sides.length;
+  if(f.kind==='city'){
+    const ax=f.sides.reduce((a,s)=>a+MID[s][0],0)/n, ay=f.sides.reduce((a,s)=>a+MID[s][1],0)/n;
+    if(n===1) return [50+(ax-50)*.6,50+(ay-50)*.6];
+    return [ax+(50-ax)*.25,ay+(50-ay)*.25];
+  }
+  if(n===1){const p=MID[f.sides[0]];return [50+(p[0]-50)*.6,50+(p[1]-50)*.6]}
+  const a=MID[f.sides[0]],b=MID[f.sides[1]];
+  return [.25*a[0]+25+.25*b[0],.25*a[1]+25+.25*b[1]];
+}
+function shieldPos(sd){
+  const n=sd.length;
+  if(n===4) return [26,26];
+  const an=anchorOf({kind:'city',sides:sd});
+  if(n===2){
+    if((sd[0]+2)%4===sd[1]){const p=MID[sd[0]];return [50+(p[0]-50)*.56,50+(p[1]-50)*.56]}
+    const a=MID[sd[0]],b=MID[sd[1]],c=[a[0]+b[0]-50,a[1]+b[1]-50];
+    return [an[0]+(c[0]-an[0])*.55,an[1]+(c[1]-an[1])*.55];
+  }
+  const o=[0,1,2,3].find(s=>!sd.includes(s)),m=MID[(o+2)%4];
+  return [an[0]+(m[0]-an[0])*.65,an[1]+(m[1]-an[1])*.65];
+}
+function baseFeatures(type){
+  const d=T[type],f=[];
+  (d.cities||[]).forEach((s,i)=>f.push({kind:'city',sides:s.slice(),shield:!!(d.shield&&i===0)}));
+  (d.roads||[]).forEach(s=>f.push({kind:'road',sides:s.slice(),shield:false}));
+  if(d.mon) f.push({kind:'mon',sides:[],shield:false});
+  return f;
+}
+function makeTile(type,rot,player){
+  const e=T[type].e;
+  const feats=baseFeatures(type).map(f=>{
+    const a=rotPt(anchorOf(f),rot);
+    const o={kind:f.kind,sides:f.sides.map(s=>(s+rot)%4),shield:f.shield,ax:a[0],ay:a[1]};
+    if(f.shield){const sp=rotPt(shieldPos(f.sides),rot);o.sx=sp[0];o.sy=sp[1]}
+    return o;
+  });
+  return {type,rot,player,feats,edges:[0,1,2,3].map(s=>e[(s-rot+4)%4])};
+}
+
+/* =====================================================================
+ * 地块美术（SVG，全部原创、程序生成）
+ * ===================================================================== */
+function roadPath(sd){
+  if(sd.length===1){const a=MID[sd[0]];return `M${a[0]},${a[1]} L50,50`}
+  const a=MID[sd[0]],b=MID[sd[1]];
+  if((sd[0]+2)%4===sd[1]) return `M${a[0]},${a[1]} L${b[0]},${b[1]}`;
+  return `M${a[0]},${a[1]} Q50,50 ${b[0]},${b[1]}`;
+}
+function cityArt(sd,narrow){
+  const n=sd.length;let fill,edge,rot=0;
+  if(n===1){
+    rot=sd[0];
+    if(narrow){fill='M12,0 H88 Q80,36 50,38 Q20,36 12,0 Z';edge='M88,0 Q80,36 50,38 Q20,36 12,0'}
+    else{fill='M0,0 H100 Q88,40 50,40 Q12,40 0,0 Z';edge='M100,0 Q88,40 50,40 Q12,40 0,0'}
+  }else if(n===2&&(sd[0]+2)%4===sd[1]){
+    rot=sd.includes(0)?0:1;
+    fill='M0,0 H100 Q60,50 100,100 H0 Q40,50 0,0 Z';
+    edge='M100,0 Q60,50 100,100 M0,100 Q40,50 0,0';
+  }else if(n===2){
+    for(let r=0;r<4;r++) if(sd.includes(r)&&sd.includes((3+r)%4)){rot=r;break}
+    fill='M0,0 H100 Q35,35 0,100 Z';edge='M100,0 Q35,35 0,100';
+  }else if(n===3){
+    const o=[0,1,2,3].find(s=>!sd.includes(s));rot=(o-2+4)%4;
+    fill='M0,0 H100 V100 Q86,46 50,46 Q14,46 0,100 Z';edge='M100,100 Q86,46 50,46 Q14,46 0,100';
+  }else{fill='M0,0 H100 V100 H0 Z';edge=''}
+  return `<g transform="rotate(${rot*90} 50 50)"><path d="${fill}" fill="#dcb57a"/><path d="${fill}" fill="url(#bricks)" opacity=".55"/>`+
+    (edge?`<path d="${edge}" fill="none" stroke="#5a3d22" stroke-width="3.6" stroke-linecap="round"/><path d="${edge}" fill="none" stroke="#f3dfae" stroke-width="1.3" stroke-dasharray="4 3"/>`:'')+`</g>`;
+}
+function monArt(){
+  return `<rect x="32" y="44" width="36" height="22" fill="#efe3c3" stroke="#4a3a26" stroke-width="2"/>`+
+    `<path d="M27,45 L50,26 L73,45 Z" fill="#a8503a" stroke="#4a3a26" stroke-width="2" stroke-linejoin="round"/>`+
+    `<rect x="45" y="53" width="10" height="13" rx="5" fill="#5b3d24"/>`+
+    `<path d="M50,15 V25 M45.5,19 H54.5" stroke="#4a3a26" stroke-width="2.4" stroke-linecap="round"/>`;
+}
+function tileArt(type){
+  const d=T[type];
+  let s=`<rect width="100" height="100" fill="url(#fieldFill)"/>`;
+  (d.roads||[]).forEach(r=>{s+=`<path d="${roadPath(r)}" fill="none" stroke="#7a5b34" stroke-width="15"/>`});
+  (d.roads||[]).forEach(r=>{s+=`<path d="${roadPath(r)}" fill="none" stroke="#efe0b4" stroke-width="10"/>`});
+  const terms=(d.roads||[]).filter(r=>r.length===1).length;
+  if(terms>=3) s+=`<circle cx="50" cy="50" r="7" fill="#efe0b4" stroke="#7a5b34" stroke-width="2.5"/>`;
+  (d.cities||[]).forEach(c=>{s+=cityArt(c,d.narrow)});
+  if(d.mon) s+=monArt();
+  s+=`<rect width="100" height="100" fill="none" stroke="#3d3222" stroke-width="1.6" opacity=".55"/>`;
+  return s;
+}
+function buildDefs(){
+  let s=`<pattern id="fieldFill" width="20" height="20" patternUnits="userSpaceOnUse"><rect width="20" height="20" fill="#a9c07b"/><path d="M3,6 l2,-3 M12,4 l2,-3 M7,15 l2,-3 M16,16 l2,-3" stroke="#8fa965" stroke-width="1" stroke-linecap="round"/></pattern>`+
+  `<pattern id="bricks" width="14" height="10" patternUnits="userSpaceOnUse"><path d="M0,.5H14M0,5.5H14M3.5,.5V5.5M10.5,5.5V10.5" stroke="#b5864d" stroke-width="1" fill="none"/></pattern>`+
+  `<g id="meeple" stroke="#1d140b" stroke-width="2.4" stroke-linejoin="round" paint-order="stroke"><circle cx="0" cy="-7.5" r="4.4"/><path d="M-3.8,-2.6 C-2,-3.4 2,-3.4 3.8,-2.6 L9.5,-.6 L9.5,2.8 L4.6,2.2 L6.2,10.5 L1.4,10.5 L0,6 L-1.4,10.5 L-6.2,10.5 L-4.6,2.2 L-9.5,2.8 L-9.5,-.6 Z"/></g>`+
+  `<g id="shield"><path d="M0,0 H12 V7 Q12,12.5 6,15 Q0,12.5 0,7 Z" fill="#ebc95f" stroke="#4a3a26" stroke-width="1.3" stroke-linejoin="round"/><path d="M6,2.5 V12 M2.5,6 H9.5" stroke="#8a6a1f" stroke-width="1.3" fill="none"/></g>`;
+  for(const k in T) s+=`<g id="t-${k}">${tileArt(k)}</g>`;
+  $('defs').innerHTML=s;
+}
+function tileG(type,rot,x,y,t){
+  t=t||makeTile(type,rot,-1);
+  let s=`<g transform="translate(${x*100} ${y*100})"><use href="#t-${type}" transform="rotate(${rot*90} 50 50)"/>`;
+  for(const f of t.feats) if(f.shield) s+=`<use href="#shield" x="${(f.sx-6).toFixed(1)}" y="${(f.sy-7.5).toFixed(1)}"/>`;
+  return s+'</g>';
+}
+function meepleG(color,px,py,sc,op){
+  return `<g transform="translate(${px.toFixed(1)} ${py.toFixed(1)}) scale(${sc})"${op?` opacity="${op}"`:''}><use href="#meeple" fill="${color}"/></g>`;
+}
+
+/* =====================================================================
+ * 游戏引擎（确定性：同一随机种子 + 同一动作序列 => 两端状态完全一致）
+ * ===================================================================== */
+let G=null, MODE='local', ME=0;
+
+function freshState(seed,mode,me){
+  const rnd=mulberry32(seed>>>0),deck=[];
+  for(const k in T){const n=T[k].n-(k==='D'?1:0);for(let i=0;i<n;i++)deck.push(k)}
+  for(let i=deck.length-1;i>0;i--){const j=(rnd()*(i+1))|0;const t=deck[i];deck[i]=deck[j];deck[j]=t}
+  return {seed,mode,me,deck,board:{'0,0':makeTile('D',0,-1)},
+    players:[0,1].map(i=>({name:PNAME[i],color:PCOL[i],score:0,meeples:7})),
+    meeples:[],turn:0,cur:null,curRot:0,phase:'place',legal:{},hover:null,pos:null,opts:[],last:[0,0],log:[],toasts:[]};
+}
+function addLog(m){G.log.unshift(m);if(G.log.length>80)G.log.pop()}
+function canAct(){return G&&(G.mode==='local'||G.turn===G.me)}
+
+function validAt(type,rot,x,y){
+  if(G.board[x+','+y]) return false;
+  const e=T[type].e;let touch=false;
+  for(let s=0;s<4;s++){
+    const nb=G.board[(x+DX[s])+','+(y+DY[s])];
+    if(!nb) continue;
+    touch=true;
+    if(nb.edges[(s+2)%4]!==e[(s-rot+4)%4]) return false;
+  }
+  return touch;
+}
+function frontier(){
+  const set={};
+  for(const k in G.board){
+    const [x,y]=k.split(',').map(Number);
+    for(let s=0;s<4;s++){const nk=(x+DX[s])+','+(y+DY[s]);if(!G.board[nk])set[nk]=1}
+  }
+  return Object.keys(set);
+}
+function legalMap(type){
+  const m={};
+  for(const k of frontier()){
+    const [x,y]=k.split(',').map(Number);
+    const rs=[0,1,2,3].filter(r=>validAt(type,r,x,y));
+    if(rs.length) m[k]=rs;
+  }
+  return m;
+}
+
+function startTurn(){
+  G.pos=null;G.opts=[];G.hover=null;G.curRot=0;
+  for(;;){
+    if(!G.deck.length){endGame();return}
+    const t=G.deck.pop(),lm=legalMap(t);
+    if(Object.keys(lm).length){
+      G.cur=t;G.legal=lm;G.phase='place';
+      addLog(`轮到${G.players[G.turn].name}`);
+      return;
+    }
+    addLog('有一块地块无处可放，已弃置');
+  }
+}
+
+function monNeighbors(x,y){
+  let n=0;
+  for(let dx=-1;dx<=1;dx++)for(let dy=-1;dy<=1;dy++){
+    if((dx||dy)&&G.board[(x+dx)+','+(y+dy)]) n++;
+  }
+  return n;
+}
+/* 计算某个要素所在的连通区域 */
+function comp(x,y,fi){
+  const key=(a,b,c)=>a+','+b+','+c;
+  const seen=new Set([key(x,y,fi)]),st=[[x,y,fi]],tiles=new Set();
+  const kind=G.board[x+','+y].feats[fi].kind;
+  let open=0,shields=0;
+  while(st.length){
+    const [cx,cy,ci]=st.pop(),f=G.board[cx+','+cy].feats[ci];
+    tiles.add(cx+','+cy);
+    if(f.shield) shields++;
+    if(f.kind==='mon') continue;
+    for(const s of f.sides){
+      const nb=G.board[(cx+DX[s])+','+(cy+DY[s])];
+      if(!nb){open++;continue}
+      const ns=(s+2)%4,nj=nb.feats.findIndex(g=>g.kind===f.kind&&g.sides.includes(ns));
+      if(nj<0) continue;
+      const k=key(cx+DX[s],cy+DY[s],nj);
+      if(!seen.has(k)){seen.add(k);st.push([cx+DX[s],cy+DY[s],nj])}
+    }
+  }
+  const ms=G.meeples.filter(m=>seen.has(key(m.x,m.y,m.fi)));
+  const complete=kind==='mon'?monNeighbors(x,y)===8:open===0;
+  return {kind,tiles:tiles.size,shields,open,complete,meeples:ms,nodes:seen,x,y};
+}
+function pointsOf(c){
+  if(c.kind==='city') return c.complete?2*c.tiles+2*c.shields:c.tiles+c.shields;
+  if(c.kind==='road') return c.tiles;
+  return 1+monNeighbors(c.x,c.y);
+}
+function award(c,final){
+  if(!c.meeples.length) return;
+  const cnt=[0,0];c.meeples.forEach(m=>cnt[m.p]++);
+  const mx=Math.max(cnt[0],cnt[1]),pts=pointsOf(c);
+  const win=[0,1].filter(p=>cnt[p]===mx);
+  win.forEach(p=>{G.players[p].score+=pts});
+  const msg=`${win.map(p=>G.players[p].name).join('、')} +${pts}（${KN[c.kind]}${final?'终局结算':'完成'}）`;
+  addLog(msg);G.toasts.push(msg);
+  c.meeples.forEach(m=>{G.players[m.p].meeples++});
+  G.meeples=G.meeples.filter(m=>!c.meeples.includes(m));
+}
+function scoreAfter(x,y){
+  const cands=[],t=G.board[x+','+y],done=new Set();
+  t.feats.forEach((f,i)=>cands.push([x,y,i]));
+  for(let dx=-1;dx<=1;dx++)for(let dy=-1;dy<=1;dy++){
+    const nb=G.board[(x+dx)+','+(y+dy)];
+    if(nb&&(dx||dy)) nb.feats.forEach((f,i)=>{if(f.kind==='mon')cands.push([x+dx,y+dy,i])});
+  }
+  for(const [cx,cy,ci] of cands){
+    if(done.has(cx+','+cy+','+ci)) continue;
+    const c=comp(cx,cy,ci);
+    c.nodes.forEach(n=>done.add(n));
+    if(c.complete) award(c,false);
+  }
+}
+function endGame(){
+  G.phase='over';G.cur=null;G.legal={};
+  const done=new Set();
+  for(const m of G.meeples.slice()){
+    if(done.has(m.x+','+m.y+','+m.fi)) continue;
+    const c=comp(m.x,m.y,m.fi);
+    c.nodes.forEach(n=>done.add(n));
+    award(c,true);
+  }
+  addLog('牌堆耗尽，终局结算完成');
+  if(typeof showEnd==='function') showEnd();
+}
+
+function doPlace(x,y,rot){
+  if(!G||G.phase!=='place'||!G.cur||!validAt(G.cur,rot,x,y)) return false;
+  const tile=makeTile(G.cur,rot,G.turn),pl=G.players[G.turn];
+  G.board[x+','+y]=tile;G.last=[x,y];G.cur=null;G.legal={};G.hover=null;
+  G.phase='meeple';G.pos=[x,y];G.opts=[];
+  addLog(`${pl.name}放下地块`);
+  if(pl.meeples>0){
+    tile.feats.forEach((f,i)=>{if(comp(x,y,i).meeples.length===0)G.opts.push(i)});
+  }
+  if(typeof ensureVisible==='function') ensureVisible(x,y);
+  if(!G.opts.length){
+    if(typeof toast==='function'&&canAct()) toast(pl.meeples>0?'这块地块上没有可放随从的位置':'你的随从已用完');
+    finishTurn(null);
+  }
+  if(typeof render==='function') render();
+  return true;
+}
+function doMeeple(fi){
+  if(!G||G.phase!=='meeple') return false;
+  if(fi!==null&&!G.opts.includes(fi)) return false;
+  finishTurn(fi);
+  if(typeof render==='function') render();
+  return true;
+}
+function finishTurn(fi){
+  const x=G.pos[0],y=G.pos[1],pl=G.players[G.turn];
+  if(fi!==null){
+    G.meeples.push({p:G.turn,x,y,fi});pl.meeples--;
+    addLog(`${pl.name}放置随从（${KN[G.board[x+','+y].feats[fi].kind]}）`);
+  }
+  G.toasts=[];
+  scoreAfter(x,y);
+  const msgs=G.toasts;G.toasts=[];
+  G.turn=1-G.turn;
+  startTurn();
+  if(msgs.length&&typeof toast==='function') toast(msgs.join('\n'),3200);
+}
+
+/* =====================================================================
+ * 联机（PeerJS / WebRTC 点对点，状态同步采用"同种子 + 动作转发"）
+ * ===================================================================== */
+let peer=null,conn=null,roomCode='';
+const CODE_ALPHA='ABCDEFGHJKLMNPQRSTUVWXYZ23456789';
+function genCode(){let s='';for(let i=0;i<5;i++)s+=CODE_ALPHA[(Math.random()*CODE_ALPHA.length)|0];return s}
+function send(m){try{if(conn&&conn.open)conn.send(m)}catch(e){console.warn(e)}}
+function lobbyErr(m){$('lobbyErr').textContent=m||''}
+function showWait(show,msg){
+  $('lobbyMain').hidden=show;$('lobbyWait').hidden=!show;
+  if(msg) $('waitMsg').textContent=msg;
+}
+function resetNet(){
+  try{if(conn)conn.close()}catch(e){}
+  try{if(peer)peer.destroy()}catch(e){}
+  peer=null;conn=null;
+}
+function setNet(text,state){const n=$('net');n.textContent=text;n.className='net'+(state?' '+state:'')}
+
+function hostRoom(retry){
+  lobbyErr('');
+  if(typeof Peer==='undefined'){lobbyErr('联机组件未能加载（需要访问 jsDelivr）。可以先用「同屏双人」体验。');return}
+  resetNet();
+  roomCode=genCode();
+  $('roomCode').textContent=roomCode;
+  showWait(true,'正在注册房间…');
+  try{peer=new Peer('kks-'+roomCode)}catch(e){lobbyErr('无法创建房间：'+e.message);showWait(false);return}
+  peer.on('open',()=>{$('waitMsg').textContent='房间已创建，等待对方加入…'});
+  peer.on('connection',c=>{
+    if(conn){c.close();return}
+    conn=c;bindConn(true);
+  });
+  peer.on('disconnected',()=>{try{peer.reconnect()}catch(e){}});
+  peer.on('error',err=>{
+    if(err.type==='unavailable-id'&&(retry||0)<4){hostRoom((retry||0)+1);return}
+    lobbyErr('连接出错：'+(err.type||err.message));
+    if(!G) showWait(false);
+  });
+}
+function joinRoom(){
+  lobbyErr('');
+  const code=$('inCode').value.trim().toUpperCase();
+  if(code.length!==5){lobbyErr('请输入 5 位房间号');return}
+  if(typeof Peer==='undefined'){lobbyErr('联机组件未能加载（需要访问 jsDelivr）。可以先用「同屏双人」体验。');return}
+  resetNet();
+  roomCode=code;$('roomCode').textContent=code;
+  showWait(true,'正在连接房间…');
+  peer=new Peer();
+  const timer=setTimeout(()=>{if(!G){lobbyErr('连接超时：请确认房间号，或换个网络再试。');resetNet();showWait(false)}},15000);
+  peer.on('open',()=>{conn=peer.connect('kks-'+code,{reliable:true});bindConn(false,timer)});
+  peer.on('error',err=>{
+    clearTimeout(timer);
+    lobbyErr(err.type==='peer-unavailable'?'找不到这个房间，请确认房间号。':'连接出错：'+(err.type||err.message));
+    resetNet();showWait(false);
+  });
+}
+function bindConn(isHost,timer){
+  const ready=()=>{
+    if(timer) clearTimeout(timer);
+    MODE=isHost?'host':'guest';ME=isHost?0:1;
+    setNet('房间 '+roomCode,'ok');
+    if(isHost){const seed=(Math.random()*4294967296)>>>0;send({t:'start',seed});startGame(seed)}
+    else $('waitMsg').textContent='已连接，等待房主开局…';
+  };
+  conn.on('open',ready);
+  conn.on('data',onData);
+  conn.on('close',()=>{
+    setNet('对方已断开','bad');
+    if(G&&G.phase!=='over') showModal('连接中断','对方已离开对局。可以返回大厅重新创建房间。',false);
+    else if(!G){lobbyErr('对方已断开连接');resetNet();showWait(false)}
+  });
+  if(conn.open) ready();
+}
+function onData(m){
+  if(!m||typeof m!=='object') return;
+  if(m.t==='start'){MODE=MODE==='local'?'guest':MODE;ME=MODE==='host'?0:1;startGame(m.seed>>>0);return}
+  if(!G||G.mode==='local'||G.turn===G.me) return;
+  if(m.t==='place') doPlace(m.x|0,m.y|0,m.rot|0);
+  else if(m.t==='meeple') doMeeple(m.fi===null?null:m.fi|0);
+}
+function localPlace(x,y,rot){if(doPlace(x,y,rot))send({t:'place',x,y,rot})}
+function localMeeple(fi){if(doMeeple(fi))send({t:'meeple',fi})}
+
+/* =====================================================================
+ * 视图：缩放 / 平移 / 渲染
+ * ===================================================================== */
+const svg=$('board'),world=$('world');
+const V={tx:0,ty:0,k:.9};
+function applyView(){world.setAttribute('transform',`translate(${V.tx.toFixed(1)} ${V.ty.toFixed(1)}) scale(${V.k.toFixed(4)})`)}
+function zoomAt(px,py,nk){V.tx=px-(px-V.tx)*nk/V.k;V.ty=py-(py-V.ty)*nk/V.k;V.k=nk;applyView()}
+function fitView(){
+  if(!G) return;
+  const r=svg.getBoundingClientRect();
+  if(!r.width||!r.height) return;
+  let x0=1e9,x1=-1e9,y0=1e9,y1=-1e9;
+  for(const k in G.board){const [x,y]=k.split(',').map(Number);x0=Math.min(x0,x);x1=Math.max(x1,x);y0=Math.min(y0,y);y1=Math.max(y1,y)}
+  const w=(x1-x0+3)*100,h=(y1-y0+3)*100;
+  V.k=clamp(Math.min(r.width/w,r.height/h),.3,.9);
+  V.tx=r.width/2-(x0+x1+1)/2*100*V.k;
+  V.ty=r.height/2-(y0+y1+1)/2*100*V.k;
+  applyView();
+}
+function ensureVisible(x,y){
+  const r=svg.getBoundingClientRect();
+  if(!r.width) return;
+  const l=V.tx+x*100*V.k,t=V.ty+y*100*V.k,s=100*V.k,m=40;
+  if(l<m||t<m||l+s>r.width-m||t+s>r.height-m) fitView();
+}
+function cellAt(px,py){
+  const r=svg.getBoundingClientRect();
+  return [Math.floor((px-r.left-V.tx)/V.k/100),Math.floor((py-r.top-V.ty)/V.k/100)];
+}
+
+function renderBoard(){
+  let tiles='',mp='';
+  for(const k in G.board){const [x,y]=k.split(',').map(Number),t=G.board[k];tiles+=tileG(t.type,t.rot,x,y,t)}
+  if(G.last) tiles+=`<rect class="lastT" x="${G.last[0]*100+2}" y="${G.last[1]*100+2}" width="96" height="96"/>`;
+  for(const m of G.meeples){
+    const f=G.board[m.x+','+m.y].feats[m.fi];
+    mp+=meepleG(G.players[m.p].color,m.x*100+f.ax,m.y*100+f.ay,1.15);
+  }
+  $('gTiles').innerHTML=tiles;$('gMeeples').innerHTML=mp;
+}
+function renderOverlay(){
+  let h='';
+  if(G.phase==='place'&&G.cur&&canAct()){
+    for(const k in G.legal){
+      const [x,y]=k.split(',').map(Number),ok=G.legal[k].includes(G.curRot);
+      h+=`<rect class="cell ${ok?'ok':'alt'}" x="${x*100+5}" y="${y*100+5}" width="90" height="90" rx="6"/>`;
+    }
+    if(G.hover&&G.legal[G.hover]){
+      const [x,y]=G.hover.split(',').map(Number),ok=G.legal[G.hover].includes(G.curRot);
+      h+=`<g opacity="${ok?.92:.5}" pointer-events="none">${tileG(G.cur,G.curRot,x,y)}</g>`;
+      h+=`<rect class="cell ${ok?'pick':'bad'}" x="${x*100+2}" y="${y*100+2}" width="96" height="96"/>`;
+    }
+  }
+  if(G.phase==='meeple'&&canAct()&&G.pos){
+    const t=G.board[G.pos[0]+','+G.pos[1]],col=G.players[G.turn].color;
+    G.opts.forEach(fi=>{
+      const f=t.feats[fi];
+      h+=`<g class="anc" data-fi="${fi}" transform="translate(${(G.pos[0]*100+f.ax).toFixed(1)} ${(G.pos[1]*100+f.ay).toFixed(1)})"><circle class="ancC" r="14"/>`+
+         `<g transform="scale(1.05)" opacity=".85"><use href="#meeple" fill="${col}"/></g></g>`;
+    });
+  }
+  $('gOverlay').innerHTML=h;
+}
+function meepleIcons(p){
+  let s='';
+  for(let i=0;i<7;i++) s+=`<svg class="mi${i>=p.meeples?' used':''}" viewBox="-11 -13 22 26"><use href="#meeple" fill="${p.color}"/></svg>`;
+  return s;
+}
+function renderPanel(){
+  $('players').innerHTML=G.players.map((p,i)=>
+    `<div class="pl${G.turn===i&&G.phase!=='over'?' on':''}" style="--pc:${p.color}">`+
+    `<div class="plTop"><span class="plName">${p.name}${G.mode!=='local'&&G.me===i?'<em>你</em>':''}</span><span class="plScore">${p.score}</span></div>`+
+    `<div class="plM">${meepleIcons(p)}</div></div>`).join('');
+  $('prev').innerHTML=G.cur?tileG(G.cur,G.curRot,0,0):'';
+  $('deckCnt').textContent=`牌堆剩余 ${G.deck.length} 张`;
+  const mine=canAct(),name=G.players[G.turn].name;
+  let hint='';
+  if(G.phase==='over') hint='对局结束。';
+  else if(!mine) hint=`等待${name}操作…`;
+  else if(G.phase==='place') hint='放置地块：点击亮起的金色虚线格。按 R 或点「旋转」改变方向。';
+  else hint='放置随从：点选地块上的圆圈；不想放就点「不放随从」。';
+  $('hint').textContent=hint;
+  $('btnRot').disabled=!(G.phase==='place'&&mine);
+  $('btnSkip').hidden=!(G.phase==='meeple'&&mine);
+  $('log').innerHTML=G.log.slice(0,40).map(l=>`<li>${l}</li>`).join('');
+}
+function render(){if(!G)return;renderBoard();renderOverlay();renderPanel()}
+function rotateCur(){
+  if(!G||G.phase!=='place'||!canAct()) return;
+  G.curRot=(G.curRot+1)%4;renderOverlay();renderPanel();
+}
+let toastTimer=0;
+function toast(msg,ms){
+  const t=$('toast');t.textContent=msg;t.classList.add('on');
+  clearTimeout(toastTimer);toastTimer=setTimeout(()=>t.classList.remove('on'),ms||2200);
+}
+
+/* ---------- 输入：拖拽、缩放、点击 ---------- */
+const pts=new Map();let drag=null,pinch=null;
+const dist=(a,b)=>Math.hypot(a[0]-b[0],a[1]-b[1]);
+svg.addEventListener('pointerdown',e=>{
+  pts.set(e.pointerId,[e.clientX,e.clientY]);
+  if(pts.size===1) drag={x:e.clientX,y:e.clientY,tx:V.tx,ty:V.ty,moved:false,target:e.target};
+  else if(pts.size===2){
+    drag=null;
+    const [a,b]=[...pts.values()],r=svg.getBoundingClientRect();
+    pinch={d:dist(a,b)||1,k:V.k,tx:V.tx,ty:V.ty,cx:(a[0]+b[0])/2-r.left,cy:(a[1]+b[1])/2-r.top};
+  }
+});
+window.addEventListener('pointermove',e=>{
+  if(pts.has(e.pointerId)) pts.set(e.pointerId,[e.clientX,e.clientY]);
+  if(pinch&&pts.size>=2){
+    const [a,b]=[...pts.values()],nk=clamp(pinch.k*dist(a,b)/pinch.d,.25,2.2);
+    V.tx=pinch.cx-(pinch.cx-pinch.tx)*nk/pinch.k;V.ty=pinch.cy-(pinch.cy-pinch.ty)*nk/pinch.k;V.k=nk;applyView();
+  }else if(drag&&pts.size===1){
+    const dx=e.clientX-drag.x,dy=e.clientY-drag.y;
+    if(!drag.moved&&Math.hypot(dx,dy)>6) drag.moved=true;
+    if(drag.moved){V.tx=drag.tx+dx;V.ty=drag.ty+dy;applyView()}
+  }
+  if(e.pointerType==='mouse'&&G&&!(drag&&drag.moved)&&e.target.closest&&e.target.closest('#board')) updateHover(e);
+});
+window.addEventListener('pointerup',e=>{
+  const d=drag;pts.delete(e.pointerId);
+  if(pts.size<2) pinch=null;
+  if(d&&!d.moved&&pts.size===0) handleTap(e,d.target);
+  if(pts.size===0) drag=null;
+});
+window.addEventListener('pointercancel',e=>{pts.delete(e.pointerId);if(pts.size<2)pinch=null;if(!pts.size)drag=null});
+svg.addEventListener('pointerleave',e=>{if(e.pointerType==='mouse'&&G&&G.hover){G.hover=null;renderOverlay()}});
+svg.addEventListener('wheel',e=>{
+  e.preventDefault();
+  const r=svg.getBoundingClientRect();
+  zoomAt(e.clientX-r.left,e.clientY-r.top,clamp(V.k*Math.exp(-e.deltaY*.0015),.25,2.2));
+},{passive:false});
+function updateHover(e){
+  if(!G||G.phase!=='place'||!canAct()) return;
+  const [cx,cy]=cellAt(e.clientX,e.clientY),k=cx+','+cy,nk=G.legal[k]?k:null;
+  if(nk!==G.hover){G.hover=nk;renderOverlay()}
+}
+function handleTap(e,tgt){
+  if(!G) return;
+  const a=tgt&&tgt.closest?tgt.closest('[data-fi]'):null;
+  if(a){if(G.phase==='meeple'&&canAct())localMeeple(+a.getAttribute('data-fi'));return}
+  if(G.phase!=='place'||!canAct()) return;
+  const [cx,cy]=cellAt(e.clientX,e.clientY);
+  cellTap(cx,cy,e.pointerType);
+}
+function cellTap(cx,cy,ptype){
+  const k=cx+','+cy,rs=G.legal[k];
+  if(!rs){toast('这里放不下：相邻的边必须同类（城市、道路、田野）');return}
+  if(rs.includes(G.curRot)){
+    if(ptype==='touch'&&G.hover!==k){G.hover=k;renderOverlay();return}
+    localPlace(cx,cy,G.curRot);
+  }else{
+    G.curRot=rs[0];G.hover=k;renderOverlay();renderPanel();
+    toast('已转到可放置的方向，再点一次确认');
+  }
+}
+window.addEventListener('keydown',e=>{
+  if(e.target&&e.target.tagName==='INPUT') return;
+  if(e.key==='r'||e.key==='R') rotateCur();
+});
+
+/* ---------- 开局 / 结束 / 大厅 ---------- */
+function startGame(seed){
+  G=freshState(seed,MODE,ME);
+  $('lobby').hidden=true;$('endModal').hidden=true;
+  if(MODE==='local') setNet('同屏双人','ok');
+  addLog('对局开始');
+  startTurn();
+  render();fitView();
+}
+function showModal(title,note,again){
+  $('endTitle').textContent=title;$('endScores').innerHTML='';
+  $('endNote').textContent=note||'';
+  $('btnAgain').hidden=!again;
+  $('endModal').hidden=false;
+}
+function showEnd(){
+  const [a,b]=G.players,w=a.score===b.score?'平局':(a.score>b.score?a:b).name+'获胜';
+  showModal(w,'',true);
+  $('endScores').innerHTML=G.players.map(p=>`<div class="endRow" style="--pc:${p.color}"><span>${p.name}</span><b>${p.score}</b></div>`).join('');
+  if(G.mode==='guest'){$('btnAgain').disabled=true;$('btnAgain').textContent='等待房主开始新局'}
+  else{$('btnAgain').disabled=false;$('btnAgain').textContent='再来一局'}
+}
+function rematch(){
+  const seed=(Math.random()*4294967296)>>>0;
+  if(MODE==='host') send({t:'start',seed});
+  startGame(seed);
+}
+function goHome(){resetNet();location.hash='';location.reload()}
+
+/* 大厅里的装饰地图：直接用引擎随机拼出来 */
+function buildHero(){
+  const saved=G;G=freshState(23,'local',0);
+  const rnd=mulberry32(77);
+  const d0=k=>{const [x,y]=k.split(',').map(Number);return Math.abs(x)+Math.abs(y)};
+  for(let i=0;i<14&&G.deck.length;i++){
+    const t=G.deck.pop(),lm=legalMap(t),ks=Object.keys(lm).sort((a,b)=>d0(a)-d0(b));
+    if(!ks.length) continue;
+    const pool=ks.slice(0,Math.min(4,ks.length)),k=pool[(rnd()*pool.length)|0],rs=lm[k];
+    G.board[k]=makeTile(t,rs[(rnd()*rs.length)|0],-1);
+  }
+  let x0=1e9,x1=-1e9,y0=1e9,y1=-1e9,s='';
+  const keys=Object.keys(G.board);
+  keys.forEach(k=>{
+    const [x,y]=k.split(',').map(Number),t=G.board[k];
+    x0=Math.min(x0,x);x1=Math.max(x1,x);y0=Math.min(y0,y);y1=Math.max(y1,y);
+    s+=tileG(t.type,t.rot,x,y,t);
+  });
+  [1,4,7,10].forEach((i,n)=>{
+    const k=keys[i];if(!k) return;
+    const [x,y]=k.split(',').map(Number),f=G.board[k].feats[0];
+    s+=meepleG(PCOL[n%2],x*100+f.ax,y*100+f.ay,1.3);
+  });
+  G=saved;
+  const pad=20;
+  $('hero').setAttribute('viewBox',`${x0*100-pad} ${y0*100-pad} ${(x1-x0+1)*100+pad*2} ${(y1-y0+1)*100+pad*2}`);
+  $('hero').innerHTML=s;
+}
+
+/* ---------- 启动 ---------- */
+buildDefs();
+buildHero();
+$('btnHost').onclick=()=>hostRoom(0);
+$('btnJoin').onclick=joinRoom;
+$('inCode').addEventListener('keydown',e=>{if(e.key==='Enter')joinRoom()});
+$('btnLocal').onclick=()=>{MODE='local';ME=0;startGame((Math.random()*4294967296)>>>0)};
+$('btnCancel').onclick=()=>{resetNet();showWait(false);lobbyErr('')};
+$('btnCopy').onclick=()=>{
+  const url=location.origin+location.pathname+'#'+roomCode;
+  const done=()=>{$('waitMsg').textContent='邀请链接已复制，发给对方即可。'};
+  if(navigator.clipboard&&navigator.clipboard.writeText) navigator.clipboard.writeText(url).then(done,()=>prompt('复制这个链接发给对方：',url));
+  else prompt('复制这个链接发给对方：',url);
+};
+$('btnRot').onclick=rotateCur;
+$('btnSkip').onclick=()=>{if(G&&G.phase==='meeple'&&canAct())localMeeple(null)};
+$('btnFit').onclick=fitView;
+$('btnAgain').onclick=rematch;
+$('btnHome').onclick=goHome;
+window.addEventListener('resize',()=>{if(G&&$('lobby').hidden)fitView()});
+(function(){
+  const m=location.hash.match(/^#([A-Za-z0-9]{5})$/);
+  if(m){$('inCode').value=m[1].toUpperCase();$('btnJoin').focus()}
+})();
+</script>
+</body>
+</html>
