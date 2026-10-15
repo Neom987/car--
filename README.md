@@ -2,10 +2,7 @@
 
 单文件 HTML，双人联机拼图对战（非官方同人实现，美术原创）。
 
-## 部署到 GitHub Pages
-1. 新建仓库，把 `index.html` 放在根目录并推送
-2. 仓库 Settings → Pages → Source 选 `Deploy from a branch`，分支选 `main`，目录 `/ (root)`
-3. 几分钟后访问 `https://<你的用户名>.github.io/<仓库名>/`
+访问 `https://Neom987.github.io/car--/`
 
 ## 玩法
 - 一人「创建房间」，把房间号或邀请链接发给对方；对方输入后自动开局（房主为红方，先手）
