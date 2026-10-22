@@ -24,6 +24,7 @@ button,input,select{font:inherit;color:inherit}
 button{cursor:pointer;touch-action:manipulation}
 :focus-visible{outline:3px solid var(--seal);outline-offset:2px}
 image{image-rendering:crisp-edges;image-rendering:pixelated}
+#board.smooth image{image-rendering:auto}
 .num{font-family:var(--pix);letter-spacing:0}
 .pxi{height:20px;width:auto;image-rendering:crisp-edges;image-rendering:pixelated;vertical-align:middle}
 
@@ -194,6 +195,28 @@ button:disabled{opacity:.4;cursor:default}
 .rotC{fill:#e9d7a8;stroke:#2b1d14;stroke-width:3;shape-rendering:crispEdges}
 .rotb:hover .rotC{fill:#f3e3b3}
 #toast{z-index:12}
+#farmBtn{position:absolute;top:10px;right:10px;z-index:7}
+#farmBtn.on{background:var(--moss);color:#fff4d6}
+#finalBar{position:absolute;left:50%;bottom:18px;transform:translateX(-50%);z-index:10;display:flex;align-items:center;gap:14px;flex-wrap:wrap;width:min(94%,540px);padding:12px 16px 16px}
+#finalBar[hidden]{display:none}
+.fbSeal{background:var(--gold);color:var(--ink);font-weight:800;padding:3px 10px;border:3px solid var(--ink);white-space:nowrap}
+#fbText{flex:1;min-width:8em;font-weight:800;font-size:17px;letter-spacing:.04em}
+#fbCount{font-size:11px;color:var(--ink2)}
+.fbBtns{display:flex;gap:6px}
+.fbTrack{position:absolute;left:12px;right:12px;bottom:6px;height:5px;background:rgba(43,29,20,.25)}
+.fbTrack b{display:block;height:100%;width:0;background:var(--seal);transition:width .35s steps(6,end)}
+#board.finalMode #gTiles,#board.finalMode #gMeeples,#board.finalMode #gFarm{filter:brightness(.5) saturate(.7);transition:filter .35s}
+.endWho{display:grid;gap:2px}
+.endWho small{font-size:12px;color:var(--ink2);font-weight:400}
+#prompt{position:relative;z-index:5;flex:none;display:flex;align-items:center;justify-content:center;gap:10px;flex-wrap:wrap;padding:6px 10px;background:var(--parch) var(--parch-url,none);background-size:96px;border-bottom:4px solid var(--ink);font-size:14px;text-align:center}
+.pStep{font-weight:800;font-size:14px;background:var(--seal);color:#fff4d6;padding:2px 12px;white-space:nowrap;border:3px solid var(--ink);text-shadow:2px 2px 0 var(--seal2);box-shadow:inset 2px 2px 0 rgba(255,255,255,.25)}
+#pTxt{font-size:14px;color:var(--ink)}
+#pBtns{display:flex;gap:6px;flex-wrap:wrap;justify-content:center}
+#choose{position:absolute;z-index:9;transform:translate(-50%,0);display:flex;gap:6px;padding:6px;background:rgba(42,26,16,.93);border:3px solid var(--ink)}
+#choose button{display:flex;flex-direction:column;align-items:center;gap:2px;min-width:58px;padding:4px 8px;background:var(--parch2);border:3px solid var(--ink);color:var(--ink);font-size:12px}
+#choose button:hover{background:var(--gold)}
+#choose img{height:30px;width:auto;image-rendering:pixelated}
+.hint{display:none}
 .js-deck{display:flex;align-items:center;gap:8px}
 .stackI{height:26px}
 .dk{display:grid;gap:3px;min-width:92px}
@@ -211,12 +234,30 @@ button:disabled{opacity:.4;cursor:default}
 #turnBanIn{display:flex;align-items:center;gap:14px;padding:10px 26px;border-color:var(--ink);background:var(--parch) var(--parch-url,none);font-size:22px;border-bottom:10px solid var(--pc)}
 #turnBanIn img{height:36px}
 #turnBanIn small{font-size:13px;color:var(--ink2)}
-.coinBox{display:grid;justify-items:center;gap:20px}
-.coinWrap{perspective:700px}
-#coinFace{position:relative;width:176px;height:176px;transform-style:preserve-3d}
-#coinFace img{position:absolute;inset:0;width:100%;height:100%;backface-visibility:hidden;-webkit-backface-visibility:hidden;image-rendering:pixelated}
-#coinBack{transform:rotateY(180deg)}
-.coinTxt{margin:0;color:#fff4d6;font-size:24px;font-weight:800;letter-spacing:.1em;text-shadow:3px 3px 0 var(--ink)}
+/* ---------- 抛硬币：3D 硬币 + 抛物线 + 落地冲击 ---------- */
+#coin{z-index:32;opacity:0;transition:opacity .2s;background:radial-gradient(circle at 50% 44%,rgba(232,193,74,.13),rgba(12,7,3,.84) 60%)}
+#coin.on{opacity:1}
+.coinBox{display:grid;justify-items:center;gap:14px;position:relative}
+.coinStage{position:relative;width:300px;height:300px;display:grid;place-items:center;padding-bottom:30px}
+.coinGlow{position:absolute;left:calc(50% - 150px);top:8px;width:300px;height:300px;border-radius:50%;opacity:0;
+  background:radial-gradient(circle,rgba(232,193,74,.5),rgba(232,193,74,.16) 42%,rgba(232,193,74,0) 68%)}
+.coinShadow{position:absolute;left:calc(50% - 76px);top:214px;width:152px;height:24px;border-radius:50%;opacity:.5;
+  background:radial-gradient(ellipse at center,rgba(0,0,0,.6),rgba(0,0,0,0) 72%)}
+.coinWrap{position:relative;z-index:2}
+.coinSquash{position:relative;width:176px;height:176px;perspective:800px}
+#coinFace{position:relative;width:176px;height:176px;will-change:transform}
+#coinFace img{position:absolute;inset:0;width:100%;height:100%;image-rendering:pixelated;backface-visibility:visible}
+.coinImpact{position:absolute;left:calc(50% - 46px);top:204px;width:92px;height:26px;border-radius:50%;
+  border:3px solid #f2d25a;opacity:0;box-shadow:0 0 12px rgba(242,210,90,.55)}
+#coinSparks{position:absolute;left:50%;top:130px;width:0;height:0}
+.coinSpark{position:absolute;left:0;top:0;width:9px;height:9px;opacity:0;background:#f7e3a0;
+  clip-path:polygon(50% 0,60% 40%,100% 50%,60% 60%,50% 100%,40% 60%,0 50%,40% 40%)}
+.coinTxt{margin:0;color:#fff4d6;font-size:23px;font-weight:800;letter-spacing:.08em;line-height:1.5;
+  text-shadow:3px 3px 0 var(--ink);display:flex;align-items:center;justify-content:center;gap:8px;min-height:1.5em}
+.coinTxt b{color:var(--cc,#e8c14a);text-shadow:2px 2px 0 rgba(0,0,0,.45)}
+.coinMini{height:34px;width:auto;image-rendering:pixelated;filter:drop-shadow(2px 2px 0 rgba(0,0,0,.4))}
+.coinHint{margin:0;font-size:12px;color:#c9ae74;letter-spacing:.14em;opacity:.85}
+@media (min-width:861px){#coin .coinBox{margin-right:350px}}
 .crownBig{height:24px;margin-right:8px}
 .modal .card.wide{width:min(760px,100%)}
 .ctH{margin:12px 0 6px;font-size:15px;display:flex;justify-content:space-between;border-bottom:3px double var(--ink2)}
@@ -285,16 +326,26 @@ button:disabled{opacity:.4;cursor:default}
       <div class="hudMid"><div class="js-deck"></div><div class="tm js-timer" hidden><span class="tmTxt">0:00</span><i class="tmBar"><b></b></i></div></div>
     </div>
     <div id="banner" hidden><span id="bannerTxt"></span><span class="bnBtns"><button class="ghost sm" type="button" data-act="reconnect">立即重连</button><button class="ghost sm" type="button" data-act="local">转为同屏继续</button><button class="ghost sm" type="button" data-act="home">返回大厅</button></span></div>
+    <button id="farmBtn" class="btn sm" type="button" data-act="farm">农民领地</button>
+    <div id="prompt" hidden><span id="pStep" class="pStep"></span><span id="pTxt"></span><span id="pBtns">
+      <button class="primary sm" type="button" data-act="skip" hidden>不放随从</button><button class="btn sm" type="button" data-act="rab" hidden>收回院长</button>
+      <button class="btn sm" type="button" data-act="mage" hidden>法师</button><button class="btn sm" type="button" data-act="witch" hidden>女巫</button>
+      <button class="btn sm" type="button" data-act="cA" hidden>A 增加随从</button><button class="btn sm" type="button" data-act="cB" hidden>B 撤回随从</button>
+      <button class="btn sm" type="button" data-act="fskip" hidden>不移动渡口</button></span></div>
     <svg id="board" xmlns="http://www.w3.org/2000/svg" role="img" aria-label="游戏棋盘">
       <defs id="defs"></defs>
       <g id="world">
         <g id="gTiles"></g>
+        <g id="gFarm" pointer-events="none"></g>
         <g id="gMeeples"></g>
         <g id="gFx" pointer-events="none"></g>
+        <g id="gFinal" pointer-events="none"></g>
         <g id="gOverlay"></g>
       </g>
     </svg>
+    <div id="finalBar" class="pxbox" hidden><span id="fbSeal" class="fbSeal">终局结算</span><span id="fbText"></span><span id="fbCount" class="num"></span><span class="fbBtns"><button class="ghost sm" type="button" data-act="finalFast">加速</button><button class="ghost sm" type="button" data-act="finalSkip">跳过</button></span><i class="fbTrack"><b id="fbBar"></b></i></div>
     <div id="toast" role="status" aria-live="polite"><div id="toastIn" class="pxbox"></div></div>
+    <div id="choose" hidden></div>
     <div id="dock">
       <svg class="prev js-prev" viewBox="-6 -6 112 112" aria-label="当前地块"></svg>
       <div class="dockMain">
@@ -302,8 +353,8 @@ button:disabled{opacity:.4;cursor:default}
         <p class="hint js-hint"></p>
         <div class="dockBtns">
           <button class="btn" type="button" data-act="rot">旋转</button>
-          <button class="btn" type="button" data-act="big">大随从</button><button class="btn" type="button" data-act="bld" hidden>建筑师</button><button class="btn" type="button" data-act="pig" hidden>猪</button><button class="btn" type="button" data-act="abb" hidden>院长</button><button class="btn" type="button" data-act="rab" hidden>收回院长</button><button class="btn" type="button" data-act="mage" hidden>法师</button><button class="btn" type="button" data-act="witch" hidden>女巫</button><button class="btn" type="button" data-act="cA" hidden>A 增加</button><button class="btn" type="button" data-act="cB" hidden>B 撤回</button><button class="btn" type="button" data-act="fskip" hidden>不移动渡口</button>
-          <button class="btn" type="button" data-act="skip">不放随从</button>
+          
+          
           <button class="primary" type="button" data-act="confirm">确认放置</button>
         </div>
       </div>
@@ -325,8 +376,8 @@ button:disabled{opacity:.4;cursor:default}
       <p class="hint js-hint"></p>
       <div class="actions">
         <button class="primary only-touch" type="button" data-act="confirm">确认放置</button>
-        <button class="btn" type="button" data-act="big">大随从</button><button class="btn" type="button" data-act="bld" hidden>建筑师</button><button class="btn" type="button" data-act="pig" hidden>猪</button><button class="btn" type="button" data-act="abb" hidden>院长</button><button class="btn" type="button" data-act="rab" hidden>收回院长</button><button class="btn" type="button" data-act="mage" hidden>法师</button><button class="btn" type="button" data-act="witch" hidden>女巫</button><button class="btn" type="button" data-act="cA" hidden>A 增加</button><button class="btn" type="button" data-act="cB" hidden>B 撤回</button><button class="btn" type="button" data-act="fskip" hidden>不移动渡口</button>
-        <button class="btn" type="button" data-act="skip">不放随从</button>
+        
+        
         <button class="ghost" type="button" data-act="nudge">催一下</button>
         <button class="ghost" type="button" data-act="catalog">地块图鉴</button>
         <button class="ghost" type="button" data-act="fit">回到中心</button>
@@ -368,7 +419,8 @@ button:disabled{opacity:.4;cursor:default}
                 <select id="cfgWarn"><option value="5">5 秒</option><option value="10">10 秒</option><option value="15">15 秒</option><option value="20">20 秒</option><option value="30">30 秒</option></select></label>
               <label class="fld" id="fldTimeout"><span>超时之后</span>
                 <select id="cfgTimeout"><option value="remind">只提醒，不强制</option><option value="auto">自动落子并跳过随从</option></select></label>
-              <p class="cfgNote">加入别人的房间时，以房主的设置为准。</p>
+              <label class="fld"><span>棋子造型</span><select id="prefFig2"><option value="classic">经典小人</option><option value="role">职业形象</option></select></label>
+              <p class="cfgNote">加入别人的房间时，以房主的设置为准；棋子造型只影响你自己的画面。</p>
             </div>
           </details>
           <details class="cfg" id="expBox" open>
@@ -377,6 +429,8 @@ button:disabled{opacity:.4;cursor:default}
               <div id="expList"></div>
               <details class="plan"><summary>路线图：计划中的扩展包</summary><ul id="planList"></ul></details>
               <div class="row"><button class="btn sm" type="button" data-act="catLobby">查看已勾选扩展的地块</button></div>
+              <div class="row"><button class="btn sm" type="button" id="btnArtImport">导入手绘地块图（单块或四拼一）…</button><button class="btn sm" type="button" id="btnArtClear">清除自定义图</button><input type="file" id="artFile" accept="image/*" multiple hidden></div>
+              <p class="cfgNote" id="artNote">未导入自定义地块图</p>
               <p class="cfgNote">扩展包均为同人再创作，美术原创，规则以游戏内说明为准。</p>
             </div>
           </details>
@@ -425,6 +479,8 @@ button:disabled{opacity:.4;cursor:default}
     <label class="fld"><span>提示音</span><input type="checkbox" id="prefSound"></label>
     <label class="fld" style="margin-top:10px"><span>震动（仅部分手机支持）</span><input type="checkbox" id="prefVib"></label>
     <label class="fld" style="margin-top:10px"><span>动画效果</span><input type="checkbox" id="prefAnim"></label>
+    <label class="fld" style="margin-top:10px"><span>棋子造型</span><select id="prefFig"><option value="classic">经典小人</option><option value="role">职业形象</option></select></label>
+    <label class="fld" style="margin-top:10px"><span>显示农民领地</span><input type="checkbox" id="prefFarm"></label>
     <ul class="rules">
       <li>每回合先放地块，相邻的边必须同类（城市、道路、田野）。</li>
       <li>放完地块后可以放一个随从；该区域内已有随从时不能再放。</li>
@@ -449,7 +505,23 @@ button:disabled{opacity:.4;cursor:default}
     <div class="row" style="justify-content:center;margin-top:14px"><button class="primary" type="button" data-act="catClose">关闭</button></div>
   </div>
 </div>
-<div id="coin" class="modal" hidden><div class="coinBox"><div class="coinWrap"><div id="coinFace"><img id="coinFront" alt=""><img id="coinBack" alt=""></div></div><p id="coinTxt" class="coinTxt"></p></div></div>
+<div id="coin" class="modal" hidden>
+  <div class="coinBox" id="coinBox">
+    <div class="coinStage">
+      <div class="coinGlow" id="coinGlow"></div>
+      <div class="coinShadow" id="coinShadow"></div>
+      <div class="coinWrap" id="coinWrap">
+        <div class="coinSquash" id="coinSquash">
+          <div id="coinFace"><img id="coinFront" alt=""><img id="coinBack" alt=""></div>
+        </div>
+      </div>
+      <div class="coinImpact" id="coinImpact"></div>
+      <div id="coinSparks"></div>
+    </div>
+    <p id="coinTxt" class="coinTxt">抛硬币决定先手…</p>
+    <p class="coinHint" id="coinHint">点击任意处跳过</p>
+  </div>
+</div>
 <div id="turnBan" hidden><div id="turnBanIn" class="pxbox"></div></div>
 <div id="confetti"></div>
 
@@ -560,6 +632,30 @@ NT('HU',1,'goods','Oo',Object.assign({garden:1,gp:[78,70]},GD('wine')));
 NT('HV',1,'goods','Tc',GD('wine'));
 NT('HW',1,'goods','Cr',GD('wine'));
 NT('HX',1,'goods',{e:'CCCC',narrow:1,cities:[[0,3],[1,2]],fields:[FS('',[50,50],[0,1])]},GD('wine'));
+/* 河流（官方大盒清单 12 块：F1 源头作为起始块，F12 湖泊最后抽，其余 10 块洗混） */
+const RF=(id,def)=>{T[id]=Object.assign({n:1,ext:'river',river:1},def);T[id].rv=[].concat.apply([],def.rivers)};
+RF('Rv1',{e:'RRVF',rivers:[[2]],roads:[[0,1]],fields:[FS('N2 E0',[84,18]),FS('E2 S0',[80,80]),FS('N0 W0 W1 W2 S2',[26,48])]});
+RF('Rv2',{e:'CVRV',rivers:[[1,3]],cities:[[0]],roads:[[2]],fields:[FS('W2',[16,34],[0]),FS('E0',[84,34],[0]),FS('W0 S2',[20,82]),FS('E2 S0',[80,82])]});
+RF('Rv3',{e:'CVCV',rivers:[[1,3]],cities:[[0],[2]],fields:[FS('W2 E0',[50,30],[0]),FS('W0 E2',[50,70],[1])]});
+RF('Rv4',{e:'VFVF',rivers:[[0,2]],fields:[FS('N0 W0 W1 W2 S2',[24,50]),FS('N2 E0 E1 E2 S0',[76,50])]});
+RF('Rv5',{e:'CCVV',rivers:[[2,3]],cities:[[0,1]],fields:[FS('W2 S0',[40,62],[0]),FS('W0 S2',[14,86])]});
+RF('Rv6',{e:'FFVV',rivers:[[2,3]],fields:[FS('N0 N1 N2 E0 E1 E2 S0 W2',[60,34]),FS('W0 S2',[14,86])]});
+RF('Rv7',{e:'VVFF',rivers:[[0,1]],fields:[FS('N2 E0',[86,14]),FS('N0 W0 W1 W2 S0 S1 S2 E2',[30,66])]});
+RF('Rv8',{e:'FVRV',rivers:[[1,3]],mon:1,mp:[34,30],roads:[[2]],fields:[FS('N0 N1 N2 E0 W2',[80,22]),FS('W0 S2',[20,82]),FS('E2 S0',[80,82])]});
+RF('Rv9',{e:'RVVR',rivers:[[1,2]],roads:[[0,3]],fields:[FS('N0 W2',[16,14]),FS('E2 S0',[84,86]),FS('N2 E0 S2 W0',[50,46])]});
+RF('Rv10',{e:'FVVF',rivers:[[1,2]],garden:1,gp:[32,32],fields:[FS('E2 S0',[84,86]),FS('N0 N1 N2 E0 W0 W1 W2 S2',[30,60])]});
+RF('Rv11',{e:'VFVR',rivers:[[0,2]],roads:[[3]],fields:[FS('N0 W2',[20,20]),FS('W0 S2',[20,82]),FS('N2 E0 E1 E2 S0',[80,50])]});
+RF('Rv12',{e:'VFFF',rivers:[[0]],lake:1,lc:[34,42],lr:26,mon:1,mp:[68,70],fields:[FS('N0 N2 E0 E1 E2 S0 S1 S2 W0 W1 W2',[16,84])]});
+/* 飞行器（8 块，箭头朝向为地块基础朝向时飞行方向） */
+const FLY=(id,def,dir,fp,extra)=>NT(id,1,'fly',def,Object.assign({fly:dir,fp:fp},extra||{}));
+FLY('Fla',{e:'FFRR',roads:[[2,3]],fields:[FS('N0 N1 N2 E0 E1 E2 S0 W2',[66,40]),FS('S2 W0',[16,84])]},[-1,0],[48,30]);
+FLY('Flb',{e:'FRFR',roads:[[1,3]],fields:[FS('N0 N1 N2 E0 W2',[60,16]),FS('S0 S1 S2 E2 W0',[50,84])]},[-1,0],[27,27]);
+FLY('Flc',{e:'RFRF',roads:[[0,2]],fields:[FS('N2 E0 E1 E2 S0',[82,50]),FS('S2 W0 W1 W2 N0',[18,70])]},[-1,0],[23,35]);
+FLY('Fld',{e:'FRFR',roads:[[1,3]],fields:[FS('N0 N1 N2 E0 W2',[66,18]),FS('S0 S1 S2 E2 W0',[50,84])]},[-1,-1],[30,21]);
+FLY('Fle',{e:'FRRF',roads:[[1,2]],fields:[FS('N0 N1 N2 E0 W0 W1 W2 S2',[40,60]),FS('E2 S0',[84,84])]},[-1,-1],[21,25]);
+FLY('Flf',{e:'RFFR',roads:[[0,3]],fields:[FS('N0 W2',[14,12]),FS('N2 E0 E1 E2 S0 S1 S2 W0',[70,70])]},[-1,0],[59,58]);
+FLY('Flg',{e:'FFFF',fields:[FS('N0 N1 N2 E0 E1 E2 S0 S1 S2 W0 W1 W2',[80,24])]},[-1,0],[23,53]);
+FLY('Flh',{e:'FFFF',garden:1,gp:[70,76],fields:[FS('N0 N1 N2 E0 E1 E2 S0 S1 S2 W0 W1 W2',[80,40])]},[-1,-1],[19,25]);
 /* 渡口（8 块，湖中三/四条路各自独立，放渡口后才连通） */
 const LF=[FS('E0',[90,26],[0]),FS('E2 S0',[78,78]),FS('S2 W0',[22,78]),FS('W2',[10,26],[0])];
 ['a','b','c'].forEach(k=>NT('F'+k,1,'ferry',{e:'CRRR',lake:1,cities:[[0]],roads:[[1],[2],[3]],fields:JSON.parse(JSON.stringify(LF))}));
@@ -592,6 +688,7 @@ NT('Cc',1,'crop',{e:'CFRF',crop:'rake',cp:[24,56],cities:[[0]],roads:[[2]],field
 NT('Cd',1,'crop',{e:'CRFR',crop:'rake',cp:[50,56],cities:[[0]],roads:[[1],[3]],fields:[FS('E0 W2',[50,22],[0]),FS('E2 S0 S1 S2 W0',[50,88])]});
 NT('Ce',1,'crop',{e:'CFCF',crop:'shield',cp:[50,50],narrow:1,cities:[[0],[2]],fields:[FS('W0 W1 W2',[14,50],[0,1]),FS('E0 E1 E2',[86,50],[0,1])]});
 NT('Cf',1,'crop',{e:'CCCC',crop:'shield',cp:[50,50],narrow:1,cities:[[0,3],[1,2]]});
+T.HB.bridge=1;T.Gf.bridge=1;
 /* 基础地块中带花园的 8 块（规则书清单中标 G 的），修道院院长可放在花园上 */
 const GP={E:[50,84],H:[50,50],I:[30,72],M:[72,72],N:[72,72],R:[50,84],U:[80,52],V:[68,36]};
 Object.keys(GP).forEach(b=>{T[b].n--;VAR('g'+b,b,1,null,{},null);T['g'+b].garden=1;T['g'+b].gp=GP[b]});
@@ -607,6 +704,8 @@ const EXPS=[
    rules:['花园的计分方式与修道院相同：被 8 块地块包围得 9 分。','普通随从不能放在花园上；院长只能放在修道院或花园上。','若本回合没有放置任何随从，可以收回场上的院长，立即得到该修道院/花园当前「1 + 周围地块数」的分数。','终局时院长按普通僧侣计分。']},
   {id:'goods',status:'ready',name:'商人与建筑师',badge:'+24 块 · 建筑师 · 猪',desc:'带货物的城市：完成者获得货物，终局每种最多者 +10 分。每人多一个建筑师（连续回合）和一只猪（让农夫田野每座城 4 分）。',
    rules:['城市里标有货物的地块：完成这座城市的人（无需有随从）每个图标获得 1 个对应货物，城市照常计分。','终局：葡萄酒、玉米、布匹各自持有最多的人 +10 分，持平则都得。','建筑师：代替随从，放在已有你自己随从的道路或城市上。之后你放的地块延伸了该要素，可立即再抽一块并放置（一次最多连续 2 块，每块都完整走三步）。建筑师不参与多数判定，要素计分后与随从一同收回。','猪：代替随从，放在已有你自己农夫的田野上，留到终局。你在该田野占多数时，每座相邻的已完成城市得 4 分（而非 3 分）；猪不计入多数。']},
+  {id:'fly',status:'ready',name:'飞行器',badge:'+8 块 · 骰子',desc:'放下带飞行器的地块后，可以把随从放到飞行器上，掷骰（1、2、3 步）沿箭头方向飞到别的地块降落。',
+   rules:['放下带飞行器的地块后，可以不照常放随从，而是把随从（或大随从）放到飞行器上。','掷骰后沿飞行器箭头方向飞出相应格数；降落地块上任何未完成的城市、道路、修道院都可以降落，哪怕已经有别人的随从。不能降落在田野上。','降落地块不存在，或没有可降落的要素时，随从返回，本回合不能再放随从。']},
   {id:'ferry',status:'ready',name:'渡口',badge:'+8 块 · 渡口',desc:'湖边的三/四条道路各自独立，放上渡口后才连通；之后延伸这条路时还能挪动渡口。',
    rules:['带湖泊的地块上，湖边每条道路都是独立的（到湖为止）。','在刚放下的湖泊地块上放旅行者时，必须取一个渡口放在湖上，连通其中两条道路（点两个端点）。','延伸一条已有渡口的路时，可以移动离新地块最近的渡口（不放也可以）；每个渡口每回合只能放置或移动一次。','移动渡口可能让已经完成的道路变成未完成。回合顺序：地块、随从、放渡口、移动渡口、计分。']},
   {id:'gold',status:'ready',name:'金矿',badge:'+8 块 · 金锭',desc:'放下带金矿的地块后，在它和相邻（含斜角）地块各放一个金锭；完成要素的人拿走其上所有地块的金锭，终局按数量折算分数。',
@@ -615,7 +714,8 @@ const EXPS=[
    rules:['放下带魔法标记的地块后，必须先放置或移动一个魔法人物（法师或女巫），只能放在未完成的城市或道路上，且两者不能在同一要素。','没有可放的位置时，必须移除场上的一个魔法人物。','完成有魔法人物的要素：法师每块 +1 分（不含盾牌），女巫先加完奖励再减半；计分后该人物撤下，下次魔法地块再放。','若放地块使两个魔法人物处于同一要素，必须立即移动其中一个。终局时魔法人物同样生效。']},
   {id:'crop',status:'ready',name:'麦田怪圈',badge:'+6 块',desc:'放下带怪圈的地块并完成回合后，选择 A（增加一个随从）或 B（撤回一个随从），双方都要照做。',
    rules:['棍棒怪圈作用于道路上的旅行者，耙子作用于田野上的农夫，盾牌作用于城市里的骑士；怪圈本身不能放随从。','放地块者选 A 或 B：A=在已有同类随从的要素上再增加一个随从；B=撤回一个同类随从（不计分）。','之后从对手开始，所有玩家依次照选定的行动执行；没有同类随从的人跳过。']},
-  {id:'river',status:'planned',name:'河流',desc:'河流起手，河水把田野分成两半。'},
+  {id:'river',status:'ready',name:'河流',badge:'+12 块 · 起始河源',desc:'河源作为起始地块，先把河流块依次接成一条河，最后以湖泊封口；之后才开始抽普通地块。河水把田野分开，道路用桥越过河流。',
+   rules:['启用河流后，起始块换成河源（带河与桥的那块），原起始块放回盒中。','游戏开始时先抽河流块（最后一张一定是湖泊），每块必须接在河的开口一端，河必须接河。','弯曲的河块不能与上一个弯曲块转向相同，避免河水绕回自身。','随从照常放置，但不能放在河上；河流把田野分隔成不同的区域。河流块全部放完后继续抽普通地块。']},
   {id:'tower',status:'planned',name:'高塔',desc:'建塔、捕获对方随从、勒索赎金。'},
   {id:'dragon',status:'planned',name:'公主、火山与龙',desc:'火山、巨龙、仙子与公主，可吃掉随从。'},
   {id:'abbey',status:'planned',name:'市长与马车',desc:'市长、马车与谷仓（官方大盒不含，仍在计划中）。'},
@@ -641,7 +741,7 @@ const LS={
   del(k){try{localStorage.removeItem(k)}catch(e){}}
 };
 const DEFCFG={farmers:true,limit:0,warn:10,timeout:'remind',exps:[]};
-let PREF=Object.assign({sound:true,vib:true,anim:true},LS.get('kks-pref')||{});
+let PREF=Object.assign({sound:true,vib:true,anim:true,figStyle:'classic',showFarm:false},LS.get('kks-pref')||{});
 const SKEY='kks-session-v3';
 
 /* =====================================================================
@@ -651,6 +751,28 @@ const CRC_T=(()=>{const t=new Uint32Array(256);for(let n=0;n<256;n++){let c=n;fo
 function crc32(b,s,e){let c=0xFFFFFFFF;for(let i=s;i<e;i++)c=CRC_T[(c^b[i])&255]^(c>>>8);return(c^0xFFFFFFFF)>>>0}
 function adler(b){let a=1,s=0;for(let i=0;i<b.length;i++){a=(a+b[i])%65521;s=(s+a)%65521}return((s<<16)|a)>>>0}
 function pngURL(w,h,px){
+  try{
+    const cv=document.createElement('canvas');cv.width=w;cv.height=h;
+    const cx=cv.getContext('2d');
+    if(cx){const id=cx.createImageData(w,h);id.data.set(px);cx.putImageData(id,0,0);return cv.toDataURL('image/png')}
+  }catch(e){}
+  return pngURLraw(w,h,px);
+}
+function epx(px,w,h){
+  const o=new Uint8Array(w*2*h*2*4),g=(x,y)=>{if(x<0||y<0||x>=w||y>=h)return -1;const k=(y*w+x)*4;return px[k+3]?(px[k]<<16|px[k+1]<<8|px[k+2]):-2};
+  const put=(x,y,c,fx,fy)=>{const k=((y*2+fy)*w*2+x*2+fx)*4;if(c>=0){o[k]=c>>16&255;o[k+1]=c>>8&255;o[k+2]=c&255;o[k+3]=255}};
+  for(let y=0;y<h;y++)for(let x=0;x<w;x++){
+    const P=g(x,y),A=g(x,y-1),B=g(x+1,y),C=g(x-1,y),D=g(x,y+1);
+    let p1=P,p2=P,p3=P,p4=P;
+    if(C===A&&C!==D&&A!==B&&A!==-1)p1=A;
+    if(A===B&&A!==C&&B!==D&&B!==-1)p2=B;
+    if(D===C&&D!==B&&C!==A&&C!==-1)p3=C;
+    if(B===D&&B!==A&&D!==C&&D!==-1)p4=D;
+    put(x,y,p1,0,0);put(x,y,p2,1,0);put(x,y,p3,0,1);put(x,y,p4,1,1);
+  }
+  return o;
+}
+function pngURLraw(w,h,px){
   const row=w*4+1,raw=new Uint8Array(row*h);
   for(let y=0;y<h;y++){raw[y*row]=0;raw.set(px.subarray(y*w*4,(y+1)*w*4),y*row+1)}
   const blocks=Math.max(1,Math.ceil(raw.length/65535)),z=new Uint8Array(2+raw.length+blocks*5+4);
@@ -740,13 +862,373 @@ class Buf{
   }
 }
 const INK='#2b1d14';
+/* ---------------------------------------------------------------------
+ * 随从造型（职业套）：20×26 手绘字符画，**1× 像素密度**
+ *   与地块同一像素网格（mkSprites 里用 u）：每颗源像素 = 1 个地块像素。
+ * 视角：参考图那种「正对镜头的 RPG 站立」—— 正面脸、正面身子、两侧露胳膊。
+ * 画风：低饱和「骨白 / 皮革 / 皮肤」三族色 + 纯黑 1px 轮廓，大脑袋小身子；
+ *   脸只有 8 格宽，两侧永远被护颊/兜帽/帽檐夹住；头与身之间用深色颈影切开；
+ *   头顶平、帽檐宽而暗（别做成蘑菇）；玩家色只做点睛（盔缨/胸甲/帽带）。
+ * 结构（26 行）：盔顶 0–7 · 帽檐 8–9 · 脸 10–14 · 颈 15 · 身 16–21 · 腿 22–25
+ * 对称：身体用 H() 写左半 10 格再镜像 —— 宽度恒为 20、左右绝对对称；
+ *       镜像做不出左右受光，所以统一用 tilt() 把右侧整体压暗制造体积。
+ * 猪用侧面视角（与经典套一致）。
+ * ------------------------------------------------------------------- */
+const FIGW=20,FIGH=26;
+const SKIN='#ffdcb4',SKIND='#e6ac7c';
+/* 材质族：每族 3~4 阶，硬边、无渐变；o 为纯黑轮廓（参考图的标志性特征） */
+const SPAL={
+  o:'#140e0a',                                                   // 轮廓（近黑）
+  W:'#f4f8ff',w:'#c6d2e2',v:'#8d9aad',u:'#5c6678',               // 钢 高/亮/中/暗
+  C:'#fffdf4',c:'#efe7cf',D:'#c9bd9c',d:'#94886a',               // 布 高/亮/中/暗
+  b:'#c98f52',B:'#8f5c28',n:'#583512',                           // 皮革 亮/中/暗
+  y:'#ffd95e',Y:'#d7a21f',O:'#8c6308',                           // 金 亮/中/暗
+  h:'#f6dc86',H:'#c8a63a',                                       // 草 亮/暗
+  l:'#7b93bd',L:'#4d6491',M:'#2f4166',                           // 丹宁 亮/中/暗
+  s:'#ffdcb4',S:'#e6ac7c',x:'#a9704f',                           // 皮肤 亮/中/暗
+  e:'#241a20',                                                   // 眼/深色
+  R:'#f2788a',                                                   // 腮红
+  k:'#2a1d14',                                                   // 颈线/深缝
+  g:'#4f9a3c',G:'#2f6a24',                                       // 绿（备用）
+  p:'#f8f8f8',P:'#cfcfcf',Q:'#8a8a8a'                            // 玩家色占位（fpal 覆盖）
+};
+function fpal(col,ex){
+  const o=Object.assign({},SPAL,{p:col,P:lighten(col,.34),Q:darken(col,.42)});
+  if(ex)for(const k in ex)o[k]=ex[k];
+  return o;
+}
+/* 左半 10 格 → 镜像成 20 格（宽度与左右对称由构造保证） */
+function H(rows){
+  return rows.map(r=>{
+    if(r.length!==FIGW/2)throw new Error('half row must be '+(FIGW/2)+' chars, got '+r.length+': "'+r+'"');
+    return r+[...r].reverse().join('');
+  });
+}
+/* 把字符画盖到 Buf 上（'.' 与 ' ' 为透明） */
+function stamp(b,rows,pal,ox,oy){
+  for(let j=0;j<rows.length;j++){
+    const r=rows[j];
+    for(let i=0;i<r.length;i++){
+      const ch=r[i];if(ch==='.'||ch===' ')continue;
+      const c=pal[ch];if(c)b.set(i+ox,j+oy,c);
+    }
+  }
+}
+/* 左受光、右背光：按 x 分成 steps 档整体压暗（台阶式而非连续渐变，
+   保证每族材质始终只有离散的几个色阶，符合参考图的硬边明暗） */
+Buf.prototype.tilt=function(k,steps){
+  steps=steps||3;
+  const w=this.w,h=this.h;
+  for(let j=0;j<h;j++)for(let i=0;i<w;i++){
+    const c=this.p[j*w+i];if(!c)continue;
+    const f=1-k*Math.round(i/(w-1)*(steps-1))/(steps-1);
+    const a=hex(c);
+    this.p[j*w+i]='#'+a.map(v=>Math.max(0,Math.min(255,Math.round(v*f))).toString(16).padStart(2,'0')).join('');
+  }
+};
+/* 合成：底图 → 道具图章 → 侧光 → 统一描边（纯黑，无奶白外圈） */
+function fig(main,pal,extras){
+  const b=new Buf(FIGW,FIGH);
+  stamp(b,main,pal,0,0);
+  if(extras)for(let i=0;i<extras.length;i++){const e=extras[i];stamp(b,e.r,pal,e.x,e.y)}
+  b.tilt(.20,3);
+  b.outline(SPAL.o,null);
+  return b.url();
+}
+
+/* 左上受光、右下背光：t 为描边厚度（像素） */
+Buf.prototype.rim=function(hi,lo,t){
+  t=t||2;
+  const w=this.w,h=this.h,q=this.p.slice(),sol=(i,j)=>i>=0&&j>=0&&i<w&&j<h&&q[j*w+i];
+  for(let j=0;j<h;j++)for(let i=0;i<w;i++){
+    if(!q[j*w+i])continue;
+    let top=false,bot=false;
+    for(let k=1;k<=t;k++){
+      if(!sol(i-k,j)||!sol(i,j-k)||!sol(i-k,j-k))top=true;
+      if(!sol(i+k,j)||!sol(i,j+k)||!sol(i+k,j+k))bot=true;
+    }
+    if(top&&!bot)this.p[j*w+i]=hi;
+    else if(bot&&!top)this.p[j*w+i]=lo;
+  }
+};
+
+/* =====================================================================
+ * 职业随从 · 20×26（正面站立，chibi 比例）
+ *   画风（对齐参考图）：大头小身、纯黑 1px 轮廓、每族 3 阶硬边明暗、
+ *         饱和材质色（钢蓝 / 草黄 / 皮革棕 / 骨白 / 丹宁蓝）+ 玩家色主袍；
+ *         脸宽 8 格，两眼各 2 格（白高光 + 深瞳）居中，外侧留 1 格皮肤 + 腮红。
+ * =================================================================== */
+
+/* ---- 骑士：钢盔（深色宽檐 + 玩家色盔缨）+ 护颊 + 长剑圆盾 ---- */
+const KN_SWORD=[
+  'vwv',
+  'vwv',
+  'vwv',
+  'vwv',
+  'vwv',
+  'vwv',
+  'yyy',
+  'bBb',
+  'bBb',
+  'nBn',
+  '.n.'];
+const KN_SHIELD=[
+  'ppppp',
+  'pWWWp',
+  'pWpWp',
+  'pWWWp',
+  'ppppp',
+  '.ppp.'];
+const KN_BODY=H([
+  '........pp',   //  0 盔缨（玩家色）
+  '.......ppp',
+  '....uuvvvv',   //  2 盔顶
+  '...uvvvvvv',
+  '...uvWvvvv',   //  4 高光
+  '...uvvvvvv',
+  '...uuvvvvv',
+  '..kuuuuuuu',   //  7 盔檐（近黑，宽）
+  '..kuuuuuuu',
+  '..kkuuuuuu',
+  '...vvvssss',   // 10 护颊 | 脸
+  '...vvvsWes',   // 11 眼（白高光 + 深瞳）
+  '...vvvRsss',   // 12 腮红
+  '...vvvSsss',   // 13 颧
+  '....vvxxxx',   // 14 下颌
+  '.....kkkkk',   // 15 颈线
+  '....pppppp',   // 16 披风肩
+  '..sppppppp',   // 17 手 | 披风
+  '...Bpppppp',   // 18 臂 | 披风
+  '...Bpppppp',
+  '....BBBBBB',   // 20 腰带
+  '....ppppp.',   // 21 披风下摆
+  '.....vvvv.',   // 22 腿甲
+  '.....vvvv.',
+  '.....vvvv.',
+  '....uuuuu.'    // 25 靴
+]);
+function mkKnight(col){
+  return fig(KN_BODY,fpal(col),[
+    {r:KN_SWORD,x:0,y:6},
+    {r:KN_SHIELD,x:14,y:15}
+  ]);
+}
+
+/* ---- 强盗：尖顶兜帽（帽檐压住脸）+ 玩家色围巾 + 皮衣 + 匕首 ---- */
+const TR_KNIFE=[
+  'vW',
+  'vv',
+  'vv',
+  'yy',
+  'bB',
+  '.n'];
+const TR_BODY=H([
+  '.........n',   //  0 兜帽尖
+  '........nn',
+  '......nnnn',
+  '.....nnnnn',
+  '....nnnnnn',
+  '...nnnnnnn',
+  '...nnnnnnn',
+  '..bbnnnnnn',   //  7 帽檐（皮革亮边）
+  '..BBBBBBBB',   //  8 帽檐暗边
+  '...BBsssss',   //  9 脸
+  '...BBsWess',   // 10 眼
+  '...BBRssss',   // 11 腮红
+  '...BBSssss',   // 12 颧
+  '....Bxxxxx',   // 13 下颌
+  '....kkkkkk',   // 14 颈线
+  '.....kkkkk',
+  '....pppppp',   // 16 风衣领（玩家色）
+  '..sppppppp',   // 17 手 | 风衣
+  '...Bpppppp',   // 18 皮肩 | 风衣
+  '...Bpppppp',
+  '....BBBBBB',   // 20 腰带
+  '..pppppppp',   // 21 下摆（外张）
+  '.....nnnn.',   // 22 皮裤
+  '.....nnnn.',
+  '.....nnnn.',
+  '....nnnnn.'    // 25 靴
+]);
+function mkTraveler(col){
+  return fig(TR_BODY,fpal(col),[
+    {r:TR_KNIFE,x:16,y:16}
+  ]);
+}
+
+/* ---- 修士：深棕短发 + 络腮胡（最独特的剪影）+ 灰蓝长袍 + 玩家色十字 ---- */
+const MO_BODY=H([
+  '......nnnn',   //  0 深棕短发（满头）
+  '.....nnnnn',
+  '....nnnnnn',
+  '...nnnnnnn',
+  '...nnsssss',   //  4 额
+  '...nnsssss',
+  '...nnsWess',   //  6 眼
+  '...nnRssss',   //  7 腮红
+  '...nnSssss',   //  8 颧
+  '...nnxxxxx',   //  9 下颌
+  '...nnBBBBB',   // 10 络腮胡
+  '..nnBBBBBB',
+  '..nnBBBBBB',   // 12 胡须加宽
+  '...kkkkkkk',   // 13 下巴
+  '....kkkkkk',
+  '.....kkkkk',   // 15 颈线
+  '....vvvvvv',   // 16 灰蓝长袍肩
+  '..svvvvvvv',   // 17 手 | 袍
+  '...vvvvppp',   // 18 圣带竖（玩家色）
+  '...vvvvppp',
+  '...vpppppp',   // 20 圣带横
+  '...vvvvppp',
+  '...vvvvppp',
+  '...vvvvppp',   // 23 圣带继续
+  '...vvvvvv.',
+  '..uuuuuuuu'    // 25 拖地袍角
+]);
+function mkMonk(col){
+  return fig(MO_BODY,fpal(col));
+}
+
+/* ---- 农民：宽平草帽（玩家色帽带）+ 丹宁背带裤 + 草叉 ---- */
+const FA_FORK=[
+  'v.v',
+  'v.v',
+  'v.v',
+  'vvv',
+  'bB.','bB.','bB.','bB.','bB.','bB.','bB.','bB.','bB.','bB.','bB.',
+  'bB.','bB.','bB.','bB.','bB.','bB.','bB.'];
+const FA_BODY=H([
+  '.......hhh',   //  0 帽顶
+  '......hhhH',
+  '.....hhhhH',
+  '....hhhhhH',
+  '..hhhhhhhh',   //  4 帽檐（最宽）
+  '.hhhhhhhhh',
+  '.HHHHHHHHH',   //  6 檐暗边
+  '..pppppppp',   //  7 玩家色帽带
+  '...nnsssss',   //  8 檐下阴影 | 脸
+  '...nnsWess',   //  9 眼
+  '...nnRssss',   // 10 腮红
+  '...nnSssss',   // 11 颧
+  '...nnxxxxx',   // 12 下颌
+  '....kkkkkk',   // 13 颈线
+  '.....kkkkk',
+  '....pppppp',   // 15 衬衫（玩家色）
+  '..sppppppp',   // 16 手 | 衬衫
+  '...Lpppppp',   // 17 背带 | 衬衫
+  '...LLppppp',
+  '....LLLLLL',   // 19 丹宁裤
+  '....llllll',
+  '....lllll.',   // 21
+  '.....LLLL.',   // 22 裤脚
+  '.....LLLL.',
+  '.....llll.',
+  '....nnnnn.'    // 25 靴
+]);
+function mkFarmer(col){
+  return fig(FA_BODY,fpal(col),[
+    {r:FA_FORK,x:0,y:3}
+  ]);
+}
+
+/* ---- 建筑师：黄色安全帽（中脊 + 宽檐）+ 皮围裙 + 木槌 ---- */
+const BU_MALLET=[
+  'vwwv',
+  'vvvv',
+  'BBB.',
+  '.Bb.',
+  '.Bb.',
+  '.Bb.',
+  '.Bb.'];
+const BU_BODY=H([
+  '.......yyy',   //  0 帽顶
+  '......yyyY',
+  '.....yyyyY',
+  '....yyyyyY',
+  '..yyyyyyyy',   //  4 帽檐
+  '.yyyyyyyyy',
+  '.OOOOOOOOO',   //  6 檐暗边
+  '...nnsssss',   //  7 檐下阴影 | 脸
+  '...nnsWess',   //  8 眼
+  '...nnRssss',   //  9 腮红
+  '...nnSssss',   // 10 颧
+  '...nnxxxxx',   // 11 下颌
+  '....kkkkkk',   // 12 颈线
+  '.....kkkkk',
+  '....pppppp',   // 14 衬衫（玩家色）
+  '..sppppppp',   // 15 手 | 衬衫
+  '...Bpppppp',   // 16 皮围裙
+  '...BBBBBBB',
+  '....BBBBBB',
+  '....bbbbbb',   // 19 围裙亮部
+  '....bbbbb.',   // 20
+  '.....BBBB.',   // 21 腿
+  '.....BBBB.',
+  '.....BBBB.',
+  '....BBBB..',
+  '...nnnnnnn'    // 25 靴
+]);
+function mkBuilderR(col){
+  return fig(BU_BODY,fpal(col),[
+    {r:BU_MALLET,x:15,y:14}
+  ]);
+}
+
+/* ---- 院长：金色主教冠（顶部小十字）+ 骨白法袍 + 玩家色圣带 + 权杖 ---- */
+const AB_CROSIER=[
+  '.y',
+  'yy',
+  'y.',
+  'yY','yY','yY','yY','yY','yY','yY','yY','yY','yY','yY',
+  'yY','yY','yY','yY','yY','yY'];
+const AB_BODY=H([
+  '.........y',   //  0 冠顶十字
+  '.......yyy',
+  '.........y',
+  '......cccc',   //  3 冠（窄而高，向上收）
+  '.....ccccc',
+  '.....ccccc',
+  '....cccccc',
+  '..DccccccC',   //  7 冠檐
+  '..DDDDDDDD',   //  8
+  '...DDDssss',   //  9 脸
+  '...DDDsWes',   // 10 眼
+  '...DDDRsss',   // 11 腮红
+  '...DDDSsss',   // 12 颧
+  '...DDDxxxx',   // 13 下颌
+  '....kkkkkk',   // 14 颈线
+  '.....kkkkk',
+  '....Cccccc',   // 16 法袍肩
+  '..sCcccccc',   // 17 手 | 袍
+  '...Cpppppp',   // 18 圣带（玩家色）
+  '...Cpppppp',
+  '...Cpppppp',   // 20
+  '...Cpppppp',
+  '...Cpppppp',
+  '...Cpppppp',   // 23 圣带垂到袍摆
+  '....Cccccc',
+  '...DDDDDDD'    // 25 拖地袍角
+]);
+function mkAbbotR(col){
+  return fig(AB_BODY,fpal(col),[
+    {r:AB_CROSIER,x:0,y:1}
+  ]);
+}
+
+/* ---- 猪：沿用最开始的原始画（18×12 方块猪，不改） ---- */
+function mkPigR(col){
+  return mkPig(col);
+}
+
+/* ---- 经典小人：卡卡颂的标志性剪影 ---- */
+/* ---- 经典小人（classic）：保持初版 19×20 的低分辨率硬边像素造型 ---- */
 function mkMeeple(col){
   const b=new Buf(19,20),hi=lighten(col,.5),lo=darken(col,.3);
-  b.disc(9.5,6,3.2,col);
-  b.poly([[7,9],[12,9],[13.8,13.4],[5.2,13.4]],col);
-  b.poly([[7,9.4],[2.8,12],[3.3,13.8],[7.6,12.2]],col);
-  b.poly([[12,9.4],[16.2,12],[15.7,13.8],[11.4,12.2]],col);
-  b.rect(5,13,3,4,col);b.rect(11,13,3,4,col);
+  b.disc(9.5,6,3.2,col);                                               // 头
+  b.poly([[7,9],[12,9],[13.8,13.4],[5.2,13.4]],col);                   // 躯干
+  b.poly([[7,9.4],[2.8,12],[3.3,13.8],[7.6,12.2]],col);                // 左臂
+  b.poly([[12,9.4],[16.2,12],[15.7,13.8],[11.4,12.2]],col);            // 右臂
+  b.rect(5,13,3,4,col);b.rect(11,13,3,4,col);                          // 双腿
   b.shade(hi,lo);
   b.outline(INK,'#fff4d6');
   return b.url();
@@ -757,6 +1239,25 @@ function mkShield(){
   b.rect(7,3,2,12,'#a67c1e');b.rect(3,6,10,2,'#a67c1e');
   b.outline(INK,null);return b.url();
 }
+
+/* ---- 小号：建筑师 / 院长 / 猪 ---- */
+function mkBuilder(col){
+  const b=new Buf(13,16);
+  b.disc(6.5,3.5,2.6,'#efe3c3');b.poly([[6.5,6],[11.5,15],[1.5,15]],col);
+  b.shade(lighten(col,.5),darken(col,.3));b.outline(INK,'#fff4d6');return b.url();
+}
+function mkAbbot(col){
+  const b=new Buf(13,17);
+  b.disc(6.5,3.6,2.8,'#efe3c3');b.poly([[6.5,6],[12,16],[1,16]],col);b.rect(5,8,3,1,'#e8c14a');b.rect(6,7,1,4,'#e8c14a');
+  b.outline(INK,'#fff4d6');return b.url();
+}
+function mkPig(col){
+  const b=new Buf(18,12),P='#f2a0c0';
+  b.rect(3,3,12,6,P);b.rect(1,4,3,4,P);b.rect(15,2,2,2,P);b.rect(4,9,2,2,P);b.rect(11,9,2,2,P);b.rect(7,3,4,1,col);
+  b.outline(INK,'#fff4d6');return b.url();
+}
+
+/* ---- 建筑与道具（沿用原画） ---- */
 function mkMon(){
   const b=new Buf(36,38),W1='#efe3c3',W2='#d3c39b',R1='#b8702e',R2='#8a4f20',D='#4a3322',B='#3f6fb5';
   b.rect(5,25,26,12,W1);b.rect(23,25,8,12,W2);
@@ -806,39 +1307,59 @@ function mkStack(){
   b.rect(14,6,4,4,'#e8c14a');
   b.outline(INK,null);return b.url();
 }
-function mkCoin(col){
-  const b=new Buf(44,44);
-  b.disc(22,22,20,'#e8c14a');b.disc(22,22,15,darken('#e8c14a',.25));b.disc(22,22,13,col);
-  b.poly([[22,10],[25,18],[34,18],[27,23],[30,32],[22,26],[14,32],[17,23],[10,18],[19,18]],'#fff4d6');
-  b.outline(INK,null);return b.url();
-}
-function mkBuilder(col){
-  const b=new Buf(13,16);
-  b.disc(6.5,3.5,2.6,'#efe3c3');b.poly([[6.5,6],[11.5,15],[1.5,15]],col);
-  b.shade(lighten(col,.5),darken(col,.3));b.outline(INK,'#fff4d6');return b.url();
-}
-function mkPig(col){
-  const b=new Buf(18,12),P='#f2a0c0';
-  b.rect(3,3,12,6,P);b.rect(1,4,3,4,P);b.rect(15,2,2,2,P);b.rect(4,9,2,2,P);b.rect(11,9,2,2,P);b.rect(7,3,4,1,col);
-  b.outline(INK,'#fff4d6');return b.url();
-}
 function mkGarden(){
   const b=new Buf(20,12),C=['#d9534f','#e8c14a','#c77dd8','#f2f2f2'];
   b.poly([[3,0],[19,0],[17,11],[0,11]],'#6b4a28');
   for(let j=1;j<10;j++)for(let i=0;i<18;i++){const x=i+Math.round(2-j*.2);if(x>=1&&x<19&&(j%2===1||i%3===0))b.set(x,j,C[(i+j)%4])}
   b.outline(INK,null);return b.url();
 }
-function mkAbbot(col){
-  const b=new Buf(13,17);
-  b.disc(6.5,3.6,2.8,'#efe3c3');b.poly([[6.5,6],[12,16],[1,16]],col);b.rect(5,8,3,1,'#e8c14a');b.rect(6,7,1,4,'#e8c14a');
-  b.outline(INK,'#fff4d6');return b.url();
+
+/* ---- 硬币：88×88（2 倍于 176px 显示，整数倍缩放） ---- */
+function mkCoin(col){
+  const b=new Buf(88,88),C1='#f7e3a0',C2='#f2cf62',C3='#e0b23c',C4='#c08f24',C5='#8f6712';
+  b.disc(44,44,43,C4);                                   // 外缘
+  b.disc(44,44,41,C3);                                   // 币身
+  b.disc(44,44,38,C2);                                   // 内场
+  b.ring(44,44,36,38,C3);
+  for(let k=0;k<56;k++){                                 // 齿边
+    const a=k/56*Math.PI*2;
+    for(let r=41;r<=43;r++)b.set(44+Math.cos(a)*r,44+Math.sin(a)*r,C5);
+  }
+  b.ring(44,44,30,32,C4);                                // 内圈
+  b.ring(44,44,32,34,C3);
+  b.disc(44,44,29,col);                                  // 玩家色徽章底
+  b.ring(44,44,26,29,darken(col,.28));
+  const star=[[44,25],[49,38],[63,38],[52,46],[57,60],[44,52],[31,60],[36,46],[25,38],[39,38]];
+  b.poly(star,'#fff4d6');                                // 徽记：星
+  b.poly([[44,31],[48,40],[44,45],[40,40]],'#e9d7a8');
+  b.ring(44,44,35,40,196,252,C1);                        // 左上高光
+  b.ring(44,44,35,41,14,76,C5);                          // 右下暗部
+  b.outline(INK,null);
+  return b.url();
 }
 const GOLDROWS=['..oooooo.','.oyyyyyYo','oyyyyyYYo','oYYYYYYYo','.ooooooo.'];
 const HATROWS=['....o....','...opo...','..oppPo..','..oppPo..','.opppPPo.','oooooooooo'];
 function mkWiz(col){
-  const b=new Buf(13,17);
-  b.disc(6.5,7,2.6,'#efe3c3');b.poly([[6.5,0],[10.5,6],[2.5,6]],col);b.poly([[6.5,9],[12,16.5],[1,16.5]],col);b.rect(5,9,3,1,'#e8c14a');
-  b.shade(lighten(col,.4),darken(col,.3));b.outline(INK,'#fff4d6');return b.url();
+  const b=new Buf(26,34);
+  b.rect(19,10,2,22,'#8a6338');
+  b.disc(20,8,3,col);b.disc(20,8,1.4,'#fff4d6');
+  b.poly([[13,14],[21,14],[24,31],[2,31]],col);
+  b.poly([[17,14],[21,14],[24,31],[19,31]],darken(col,.28));
+  b.rect(9,20,6,2,'#e8c14a');
+  b.disc(13,10,4.6,SKIN);
+  b.rect(11,10,2,2,'#2b1d14');b.rect(15,10,2,2,'#2b1d14');
+  b.poly([[13,0],[19,8],[7,8]],col);
+  b.rect(7,7,13,2,darken(col,.3));
+  b.rim(lighten(col,.4),darken(col,.3),1);
+  b.outline(INK,'#fff4d6');
+  return b.url();
+}
+function mkFly(){
+  const b=new Buf(26,16);
+  b.poly([[10,0],[20,1],[22,7],[12,7]],'#e9dcb6');b.poly([[10,15],[20,14],[22,8],[12,8]],'#e9dcb6');
+  for(let x=12;x<=20;x+=2){b.rect(x,1,1,6,'#b9a77c');b.rect(x,9,1,6,'#b9a77c')}
+  b.rect(7,7,15,2,'#e8703a');b.poly([[0,8],[8,3],[8,13]],'#e8703a');b.rect(8,6,2,4,'#c9552a');
+  b.outline(INK,null);return b.url();
 }
 function mkCC(kind){
   const b=new Buf(18,22),G1='#a8761a';
@@ -850,13 +1371,22 @@ function mkCC(kind){
 }
 const SPR={},SZ={};
 function mkSprites(){
-  const set=(k,s,u)=>{SPR[k]=s;SZ[k]=[s.w*u,s.h*u]},u=100/PN;
+  const set=(k,s,u)=>{SPR[k]=s;SZ[k]=[s.w*u,s.h*u]},u=100/PN,f=u/2;
   set('shield',mkShield(),u);set('cath',mkCath(),1.3);set('inn',mkInn(),u);set('mon',mkMon(),u);
   ['wine','grain','cloth','crown'].forEach(k=>set(k,sprite(up2(SRC[k]),PAL),u));
-  set('rot',mkRot(),u);set('gold',sprite(GOLDROWS,PAL),u);set('hat',sprite(up2(HATROWS),PAL),u);set('mg',mkWiz('#8a55b8'),u);set('wt',mkWiz('#e8903a'),u);['club','rake','shield'].forEach(k=>set('cc_'+k,mkCC(k),u));set('garden',mkGarden(),u);set('stack',mkStack(),u);
-  for(let i=0;i<2;i++){set('mp'+i,mkMeeple(PCOL[i]),u);set('bd'+i,mkBuilder(PCOL[i]),u);set('ab'+i,mkAbbot(PCOL[i]),u);set('pg'+i,mkPig(PCOL[i]),u);set('coin'+i,mkCoin(PCOL[i]),u)}
+  set('rot',mkRot(),u);set('fly',mkFly(),u);set('gold',sprite(GOLDROWS,PAL),u);set('hat',sprite(up2(HATROWS),PAL),u);
+  set('mg',mkWiz('#8a55b8'),f);set('wt',mkWiz('#e8903a'),f);
+  ['club','rake','shield'].forEach(k=>set('cc_'+k,mkCC(k),u));
+  set('garden',mkGarden(),u);set('stack',mkStack(),u);
+  for(let i=0;i<2;i++){
+    /* 两套随从都用 u（1× 源像素 = 1 个地块像素）：角色套也是 24×28 手绘字符画，
+       与地块同网格，不做分辨率叠加 */
+    set('mp'+i,mkMeeple(PCOL[i]),u);set('bd'+i,mkBuilder(PCOL[i]),u);set('ab'+i,mkAbbot(PCOL[i]),u);set('pg'+i,mkPig(PCOL[i]),u);
+    set('kn'+i,mkKnight(PCOL[i]),u);set('tr'+i,mkTraveler(PCOL[i]),u);set('mk'+i,mkMonk(PCOL[i]),u);
+    set('fm'+i,mkFarmer(PCOL[i]),u);set('rb'+i,mkBuilderR(PCOL[i]),u);set('ra'+i,mkAbbotR(PCOL[i]),u);
+    set('rp'+i,mkPigR(PCOL[i]),u);set('coin'+i,mkCoin(PCOL[i]),1);
+  }
 }
-
 /* ---- 地块像素渲染（64×64，基础朝向；之后整图旋转） ---- */
 const PN=64;
 function flat(d){
@@ -895,11 +1425,10 @@ function roadPath(sd){
   if((sd[0]+2)%4===sd[1]) return `M${a[0]},${a[1]} L${b[0]},${b[1]}`;
   return `M${a[0]},${a[1]} Q50,50 ${b[0]},${b[1]}`;
 }
-function cityShape(sd,narrow){
+function cityShape(sd){
   const n=sd.length;let fill,rot=0;
   if(n===1){
-    rot=sd[0];
-    fill=narrow?'M12,0 H88 Q80,36 50,38 Q20,36 12,0 Z':'M0,0 H100 Q88,40 50,40 Q12,40 0,0 Z';
+    rot=sd[0];fill='M0,0 H100 Q91,36 50,44 Q9,36 0,0 Z';
   }else if(n===2&&(sd[0]+2)%4===sd[1]){
     rot=sd.includes(0)?0:1;fill='M0,0 H100 Q60,50 100,100 H0 Q40,50 0,0 Z';
   }else if(n===2){
@@ -911,6 +1440,59 @@ function cityShape(sd,narrow){
   }else fill='M0,0 H100 V100 H0 Z';
   return {fill,rot};
 }
+const ANC={};
+const HOUSEC=[['#c9553a','#8f3a28'],['#3f6fb5','#274a7a'],['#d98f45','#9a5a24']];
+function mkHouseB(v){
+  const r1=HOUSEC[v][0],r2=HOUSEC[v][1],b=new Buf(24,18);
+  b.rect(3,8,18,9,'#f1e6c6');b.rect(15,8,6,9,'#d3c39b');
+  b.poly([[0,9],[24,9],[19,1],[5,1]],r1);b.poly([[12,1],[19,1],[24,9],[12,9]],r2);
+  for(let y=3;y<9;y+=2)for(let x=1;x<24;x++){const c=b.p[y*24+x];if(c===r1||c===r2)b.set(x,y,darken(c,.22))}
+  b.rect(10,12,4,5,'#4a3322');b.rect(5,11,3,3,'#3f6fb5');b.rect(17,11,3,3,'#3f6fb5');
+  if(v===0)b.rect(17,0,3,4,'#8a7a5a');
+  b.outline(INK,null);return b;
+}
+function mkTreeB(v){
+  const b=new Buf(20,22);
+  b.rect(8,15,4,6,'#6b4a28');
+  b.disc(10,10,8,'#2f6a2a');b.disc(9,9,6.5,'#3f8a35');b.disc(8,7.5,4.5,'#5aa844');b.disc(7,6,2.2,'#86cc62');
+  if(v){b.set(13,12,'#e8c14a');b.set(5,13,'#e85a4a')}
+  b.outline('#1f3d1c',null);return b;
+}
+function mkRockB(){const b=new Buf(9,6);b.disc(4,3.5,3.4,'#8d97a1');b.disc(3.5,3,2.2,'#b9bec4');b.outline('#4a5560',null);return b}
+function mkBushB(){const b=new Buf(12,8);b.disc(6,4.5,3.8,'#4a8f3a');b.disc(4.5,4,2.6,'#6bb04e');b.disc(8,4.5,2.4,'#6bb04e');b.outline('#2f5a2c',null);return b}
+const ROOFS=[['#c9553a','#8f3a28'],['#d98f45','#9a5a24'],['#3f6fb5','#274a7a'],['#a8453a','#6e2a22'],['#7a8f4a','#4f6030']];
+function mkTownHouse(w,h,ri,v){
+  const r1=ROOFS[ri][0],r2=ROOFS[ri][1],b=new Buf(w,h),ry=Math.round(h*.55);
+  b.rect(1,ry,w-2,h-ry,'#f1e6c6');b.rect(w-3,ry,2,h-ry,'#cdb98d');
+  b.poly([[0,ry+1],[w,ry+1],[w-2,1],[2,1]],r1);
+  b.poly([[w/2,1],[w-2,1],[w,ry+1],[w/2,ry+1]],r2);
+  for(let y=3;y<=ry;y+=2)for(let x=0;x<w;x++){const c=b.p[y*w+x];if(c===r1||c===r2)b.set(x,y,darken(c,.2))}
+  const dh=Math.max(2,Math.floor((h-ry)/2));
+  b.rect(Math.floor(w/2)-1,h-dh,2,dh,'#4a3322');
+  if(w>=9){b.rect(2,ry+1,2,2,'#3f6fb5');if(w>=11)b.rect(w-5,ry+1,2,2,'#3f6fb5')}
+  if(v&1)b.rect(w-5,0,2,3,'#8a7a5a');
+  b.outline(INK,null);return b;
+}
+function mkTowerB(){
+  const b=new Buf(8,15);
+  b.rect(1,7,6,8,'#d6c8a0');b.rect(5,7,2,8,'#b8a67c');
+  [1,3,5].forEach(x=>b.rect(x,6,1,1,'#d6c8a0'));
+  b.poly([[4,0],[8,6],[0,6]],'#3f6fb5');b.poly([[4,0],[8,6],[4,6]],'#274a7a');
+  b.rect(3,10,2,3,'#3a2a1c');
+  b.outline(INK,null);return b;
+}
+let TOWN=null;
+function town(){
+  if(TOWN) return TOWN;
+  const sizes=[[9,9],[11,9],[8,11],[12,10],[7,8]],hs=[];
+  sizes.forEach((z,zi)=>ROOFS.forEach((r,ri)=>hs.push(mkTownHouse(z[0],z[1],ri,zi+ri))));
+  return TOWN={h:hs,t:mkTowerB()};
+}
+let DEC=null;
+function dec(){return DEC||(DEC={h:[0,1,2].map(mkHouseB),t:[mkTreeB(0),mkTreeB(1)],r:mkRockB(),b:mkBushB()})}
+function stampBuf(px,b,i0,j0){
+  for(let y=0;y<b.h;y++)for(let x=0;x<b.w;x++){const c=b.p[y*b.w+x],i=i0+x,j=j0+y;if(c&&i>=0&&j>=0&&i<PN&&j<PN)setPx(px,PN,i,j,c)}
+}
 const HOUSE=['ooooooooooo','ollllLddddo','ollllLddddo','ollllLddddo','ollllLddddo','ollllLddddo','ooooooooooo'];
 const HP={o:'#2b1d14',l:'#d98f45',L:'#f2b46a',d:'#9a5a24'};
 const TREE=['..ooooo..','.ohhhggo.','ohhhgggGo','ohhgggGGo','ohggggGGo','oggggGGGo','oggGGGGGo','.oGGGGGo.','..ooooo..'];
@@ -921,45 +1503,178 @@ function stampPx(px,rows,i0,j0,pal){
   rows.forEach((r,y)=>{for(let x=0;x<r.length;x++){const ch=r[x];if(ch!=='.'&&pal[ch]){const i=i0+x,j=j0+y;if(i>=0&&j>=0&&i<PN&&j<PN)setPx(px,PN,i,j,pal[ch])}}});
 }
 function renderTile(key){
-  const d=T[key],U=100/PN,sd=key.charCodeAt(0);
-  const cls=new Uint8Array(PN*PN),px=new Uint8Array(PN*PN*4);
-  const polys=(d.cities||[]).map(s=>{const c=cityShape(s,d.narrow);return {poly:flat(c.fill)[0],rot:c.rot}});
-  const lines=(d.roads||[]).map(s=>flat(roadPath(s))[0]);
+  const d=T[key],U=100/PN,N=PN*PN,sd=key.charCodeAt(0)*3+(key.length>1?key.charCodeAt(1)*7:0);
+  const cls=new Uint8Array(N),cid=new Uint8Array(N),brg=new Uint8Array(N),px=new Uint8Array(N*4);
+  const polys=(d.cities||[]).map(q=>{const c=cityShape(q);return {poly:flat(c.fill)[0],rot:c.rot}});
+  const lines=(d.roads||[]).map(q=>flat(roadPath(q))[0]);
+  const rlines=(d.rivers||[]).map(q=>flat(roadPath(q))[0]);
   const terms=(d.roads||[]).filter(r=>r.length===1).map(r=>r[0]);
   const junction=terms.length>=3||!!d.split;
+  const lk=d.lake?{c:d.lc||[50,50],r:d.lr||21}:null;
   for(let j=0;j<PN;j++)for(let i=0;i<PN;i++){
-    const x=(i+.5)*U,y=(j+.5)*U;let c=0;
-    for(const L of lines) if(distPoly(x,y,L)<=7.5){c=1;break}
-    if(junction&&Math.hypot(x-50,y-50)<=9) c=1;
-    for(const P of polys){
-      let p=[x,y];for(let r=0;r<P.rot;r++)p=[p[1],100-p[0]];
-      if(inPoly(p[0],p[1],P.poly)){c=2;break}
+    const x=(i+.5)*U,y=(j+.5)*U;let c=0,id=0,onR=false;
+    for(const L of rlines) if(distPoly(x,y,L)<=8){c=4;break}
+    for(const L of lines) if(distPoly(x,y,L)<=7.5){onR=true;break}
+    if(junction&&Math.hypot(x-50,y-50)<=9) onR=true;
+    if(onR){if(c===4)brg[j*PN+i]=1;c=1}
+    for(let q=0;q<polys.length;q++){
+      const P=polys[q];let p=[x,y];for(let r=0;r<P.rot;r++)p=[p[1],100-p[0]];
+      if(inPoly(p[0],p[1],P.poly)){c=2;id=q+1;break}
     }
-    if(d.lake&&Math.hypot(x-50,y-50)<=21+4*hash(i>>1,j>>1,sd+5)) c=3;
-    cls[j*PN+i]=c;
+    if(lk&&c!==2&&Math.hypot(x-lk.c[0],y-lk.c[1])<=lk.r+4*hash(i>>2,j>>2,sd+5)+2*hash(i,j,sd+6)) c=3;
+    cls[j*PN+i]=c;cid[j*PN+i]=id;
+  }
+  /* 同一地块内相邻的两座独立城市，在交界处留出一道田野缝隙，看上去不再连成一片 */
+  {
+    const carve=[];
+    for(let idx=0;idx<N;idx++){
+      if(cls[idx]!==2) continue;
+      const i=idx%PN,j=(idx/PN)|0,id=cid[idx];let hit=false;
+      for(let a=-2;a<=2&&!hit;a++)for(let b=-2;b<=2;b++){
+        const x=i+a,y=j+b;if(x<0||y<0||x>=PN||y>=PN)continue;
+        const k=y*PN+x;if(cls[k]===2&&cid[k]!==id){hit=true;break}
+      }
+      if(hit) carve.push(idx);
+    }
+    carve.forEach(k=>{cls[k]=0;cid[k]=0});
   }
   const at=(i,j)=>(i<0||j<0||i>=PN||j>=PN)?-1:cls[j*PN+i];
-  const N4=[[1,0],[-1,0],[0,1],[0,-1]];
-  const bfs=(cc,other)=>{
-    const D=new Int16Array(PN*PN).fill(-1),q=[];
-    for(let j=0;j<PN;j++)for(let i=0;i<PN;i++){
-      if(at(i,j)!==cc)continue;
-      if(N4.some(n=>{const t=at(i+n[0],j+n[1]);return t>=0&&other(t)})){D[j*PN+i]=0;q.push(j*PN+i)}
-    }
+  const N4=[[1,0],[-1,0],[0,1],[0,-1]],isW=t=>t===3||t===4;
+  function bfs(seeds,mem,lim){
+    const D=new Int16Array(N).fill(-1),q=seeds.slice();seeds.forEach(k=>{D[k]=0});
     for(let h=0;h<q.length;h++){
       const idx=q[h],i=idx%PN,j=(idx/PN)|0;
-      for(const n of N4){const a=i+n[0],b=j+n[1];if(a<0||b<0||a>=PN||b>=PN)continue;const k=b*PN+a;if(D[k]<0&&cls[k]===cc){D[k]=D[idx]+1;q.push(k)}}
+      if(lim&&D[idx]>=lim) continue;
+      for(const n of N4){const a=i+n[0],b=j+n[1];if(a<0||b<0||a>=PN||b>=PN)continue;const k=b*PN+a;if(D[k]<0&&mem(k)){D[k]=D[idx]+1;q.push(k)}}
     }
     return D;
+  }
+  const sC=[],sR=[],sW=[],fC=[],fR=[],fW=[];
+  for(let idx=0;idx<N;idx++){
+    const i=idx%PN,j=(idx/PN)|0,c=cls[idx];
+    let nC=false,nR=false,nW=false,diff=false;
+    for(const n of N4){
+      const a=i+n[0],b=j+n[1];if(a<0||b<0||a>=PN||b>=PN)continue;
+      const t=cls[b*PN+a];
+      if(t===2&&c!==2)nC=true;if(t===1&&c!==1)nR=true;if(isW(t)&&!isW(c))nW=true;
+      if(c===2&&t===2&&cid[b*PN+a]!==cid[idx])diff=true;
+    }
+    if(c===2&&(diff||N4.some(n=>{const t=at(i+n[0],j+n[1]);return t>=0&&t!==2})))sC.push(idx);
+    if(c===1&&N4.some(n=>{const t=at(i+n[0],j+n[1]);return t>=0&&t!==1}))sR.push(idx);
+    if(isW(c)&&N4.some(n=>{const t=at(i+n[0],j+n[1]);return t>=0&&!isW(t)}))sW.push(idx);
+    if(c===0){if(nC)fC.push(idx);if(nR)fR.push(idx);if(nW)fW.push(idx)}
+  }
+  const cd=bfs(sC,k=>cls[k]===2),rd=bfs(sR,k=>cls[k]===1),wd=bfs(sW,k=>isW(cls[k]));
+  const nearC=bfs(fC,k=>cls[k]===0,5),nearR=bfs(fR,k=>cls[k]===0,3),nearW=bfs(fW,k=>cls[k]===0,4);
+
+  /* ---- 要素锚点：用真实像素区域求「最深处」，随从、盾牌、货物都落在要素内部且互不重叠 ---- */
+  const blocked=[];
+  if(d.mon) blocked.push([d.mp||[50,52],27]);
+  if(d.garden) blocked.push([d.gp,17]);
+  if(d.crop) blocked.push([d.cp,18]);
+  if(d.fly) blocked.push([d.fp,14]);
+  if(d.gold) blocked.push([[84,14],10]);
+  if(d.magic) blocked.push([[16,84],10]);
+  const isBlk=idx=>{const x=((idx%PN)+.5)*U,y=(((idx/PN)|0)+.5)*U;return blocked.some(b=>Math.hypot(x-b[0][0],y-b[0][1])<b[1])};
+  const toU=idx=>[+(((idx%PN)+.5)*U).toFixed(1),+((((idx/PN)|0)+.5)*U).toFixed(1)];
+  function pole(mem,lim){
+    const seeds=[];let cx=0,cy=0,cnt=0;
+    for(let idx=0;idx<N;idx++){
+      if(!mem(idx))continue;const i=idx%PN,j=(idx/PN)|0;cx+=i;cy+=j;cnt++;
+      if(i===0||j===0||i===PN-1||j===PN-1){seeds.push(idx);continue}
+      for(const n of N4){if(!mem((j+n[1])*PN+i+n[0])){seeds.push(idx);break}}
+    }
+    if(!cnt) return null;
+    const D=bfs(seeds,mem);cx/=cnt;cy/=cnt;
+    let best=-1,bd=-1,bc=1e9;
+    for(let idx=0;idx<N;idx++){
+      if(D[idx]<0)continue;
+      const dc=Math.hypot(idx%PN-cx,((idx/PN)|0)-cy);
+      if(D[idx]>bd||(D[idx]===bd&&dc<bc)){bd=D[idx];best=idx;bc=dc}
+    }
+    return {idx:best,D,mem};
+  }
+  const far=(mem,D,from,minD)=>{
+    let best=-1,bv=-1;
+    for(let idx=0;idx<N;idx++){
+      if(!mem(idx)||D[idx]<minD)continue;
+      let m=1e9;from.forEach(f=>{m=Math.min(m,Math.hypot(idx%PN-f%PN,((idx/PN)|0)-((f/PN)|0)))});
+      if(m>bv){bv=m;best=idx}
+    }
+    return best;
   };
-  const cd=bfs(2,t=>t!==2),rd=bfs(1,t=>t===0);
-  /* 路口分隔桩：每条路在离中心 19 的位置横着一根桩，中心是石墩，让人一眼看出这里把道路断开 */
+  const AN={city:[],road:[],field:[],mon:d.mp||[50,50]};
+  polys.forEach((P,q)=>{
+    const mem=idx=>cid[idx]===q+1&&!isBlk(idx),pl=pole(mem);
+    if(!pl){AN.city.push({p:[50,50],s1:[30,30],s2:[70,70]});return}
+    const p1=far(mem,pl.D,[pl.idx],4),p2=far(mem,pl.D,[pl.idx,p1<0?pl.idx:p1],4);
+    AN.city.push({p:toU(pl.idx),s1:toU(p1<0?pl.idx:p1),s2:toU(p2<0?pl.idx:p2)});
+  });
+  lines.forEach((L,ri)=>{
+    let tot=0;const seg=[];for(let a=0;a<L.length-1;a++){const l=Math.hypot(L[a+1][0]-L[a][0],L[a+1][1]-L[a][1]);seg.push(l);tot+=l}
+    const at2=t=>{let acc=0;for(let a=0;a<seg.length;a++){if(acc+seg[a]>=t||a===seg.length-1){const u=Math.min(1,Math.max(0,(t-acc)/(seg[a]||1)));return [L[a][0]+(L[a+1][0]-L[a][0])*u,L[a][1]+(L[a+1][1]-L[a][1])*u]}acc+=seg[a]}return L[0]};
+    const single=d.roads[ri].length===1;
+    const fr=single?(d.lake?.3:.5):.5;
+    const tries=d.bridge?[.2,.14,.28,.8,.86]:[fr,fr-.15,fr+.15,fr-.28,fr+.28];
+    let p=null;
+    const okP=(q,margin)=>q[0]>=margin&&q[0]<=100-margin&&q[1]>=margin&&q[1]<=100-margin&&at(Math.floor(q[0]/U),Math.floor(q[1]/U))===1&&(!d.bridge||Math.hypot(q[0]-50,q[1]-50)>=22)&&!AN.road.some(r=>Math.hypot(r.p[0]-q[0],r.p[1]-q[1])<16);
+    for(const m of [10,7,3]){
+      for(const f of tries){if(f<0||f>1)continue;const q=at2(tot*f);if(okP(q,m)){p=q;break}}
+      if(p)break;
+      let bd=1e9;
+      for(let t=0;t<=tot;t+=2){const q=at2(t);if(okP(q,m)){const dd=Math.abs(t-tot*fr);if(dd<bd){bd=dd;p=q}}}
+      if(p)break;
+    }
+    if(!p)p=at2(tot*fr);
+    const dx=L[L.length-1][0]-L[0][0],dy=L[L.length-1][1]-L[0][1],nl=Math.hypot(dx,dy)||1,nx=-dy/nl,ny=dx/nl;
+    const ok=q=>q[0]>10&&q[0]<90&&q[1]>10&&q[1]<90&&at(Math.floor(q[0]/U),Math.floor(q[1]/U))===0;
+    let inn=null;
+    for(const dist of [17,22,13]){for(const sg of [1,-1]){const q=[p[0]+nx*dist*sg,p[1]+ny*dist*sg];if(ok(q)){inn=q;break}}if(inn)break}
+    if(!inn)inn=[p[0]+nx*17,p[1]+ny*17];
+    AN.road.push({p:[+p[0].toFixed(1),+p[1].toFixed(1)],inn:[+inn[0].toFixed(1),+inn[1].toFixed(1)]});
+  });
+  const lab=new Int16Array(N).fill(-1);
+  const segPt=(sdn,q)=>{
+    if(sdn===0)return [q===0?17:q===2?83:50,3];
+    if(sdn===1)return [97,q===0?17:q===2?83:50];
+    if(sdn===2)return [q===0?83:q===2?17:50,97];
+    return [3,q===0?83:q===2?17:50]};
+  const nearF=(pt)=>{
+    const ci=Math.floor(pt[0]/U),cj=Math.floor(pt[1]/U);
+    for(let r=0;r<=9;r++)for(let a=-r;a<=r;a++)for(let b=-r;b<=r;b++){const i2=ci+a,j2=cj+b;if(i2>=0&&j2>=0&&i2<PN&&j2<PN&&cls[j2*PN+i2]===0)return j2*PN+i2}
+    return -1;
+  };
+  const q0=[];
+  (d.fields||[]).forEach((f,fi)=>{
+    let got=0;
+    for(const sg of parseSegs(f.s)){const k=nearF(segPt(sg[0],sg[1]));if(k>=0&&lab[k]<0){lab[k]=fi;q0.push(k);got++}}
+    if(!got){let bd=1e9,bk=-1;const ci=f.a[0]/U,cj=f.a[1]/U;for(let idx=0;idx<N;idx++)if(cls[idx]===0&&lab[idx]<0){const dd=Math.hypot(idx%PN-ci,((idx/PN)|0)-cj);if(dd<bd){bd=dd;bk=idx}}if(bk>=0){lab[bk]=fi;q0.push(bk)}}
+  });
+  for(let h=0;h<q0.length;h++){const k=q0[h],i2=k%PN,j2=(k/PN)|0;for(const n of N4){const a=i2+n[0],b=j2+n[1];if(a<0||b<0||a>=PN||b>=PN)continue;const kk=b*PN+a;if(cls[kk]===0&&lab[kk]<0){lab[kk]=lab[k];q0.push(kk)}}}
+  const fieldLab=[];
+  (d.fields||[]).forEach((f,fi)=>{
+    fieldLab.push(fi);
+    const mem=idx=>lab[idx]===fi&&!isBlk(idx),pl=pole(mem);
+    AN.field.push(pl?toU(pl.idx):f.a.slice());
+  });
+  AN.fieldLab=fieldLab;AN.lab=lab;
+  ANC[key]=AN;
+  const occ=new Uint8Array(N);
+  const reserve=(p,r)=>{const ci=p[0]/U,cj=p[1]/U,rr=r/U;for(let j=Math.max(0,Math.floor(cj-rr));j<=Math.min(PN-1,Math.ceil(cj+rr));j++)for(let i=Math.max(0,Math.floor(ci-rr));i<=Math.min(PN-1,Math.ceil(ci+rr));i++)if(Math.hypot(i-ci,j-cj)<=rr)occ[j*PN+i]=1};
+  const cmods=(d.mods&&d.mods.city)||{};
+  AN.city.forEach((c,q)=>{
+    const m=cmods[q]||{},sh=q===0&&d.shield,gd=m.goods||m.cath;
+    reserve(c.p,10);if(sh||gd)reserve(c.s1,8);if(sh&&gd)reserve(c.s2,8);
+  });AN.road.forEach(r=>{reserve(r.p,10);reserve(r.inn,9)});AN.field.forEach(f=>reserve(f,12));
+  if(d.mon)reserve(AN.mon,26);blocked.forEach(b=>reserve(b[0],b[1]));
+
+  /* ---- 路口分隔桩 ---- */
   const post=(x,y)=>{
     if(!junction) return null;
     const hr=Math.hypot(x-50,y-50);
     if(hr<=5.5) return hr>=4?'#4a3322':'#9d8a68';
-    for(const s of terms){
-      const vx=(MID[s][0]-50)/50,vy=(MID[s][1]-50)/50,nx=-vy,ny=vx;
+    for(const sdn of terms){
+      const vx=(MID[sdn][0]-50)/50,vy=(MID[sdn][1]-50)/50,nx=-vy,ny=vx;
       const al=(x-50)*vx+(y-50)*vy,ac=(x-50)*nx+(y-50)*ny;
       if(Math.abs(al-19)<=2.6&&Math.abs(ac)<=10.5){
         if(Math.abs(ac)>=8.4) return '#e8c14a';
@@ -968,7 +1683,6 @@ function renderTile(key){
     }
     return null;
   };
-  const occ=new Uint8Array(PN*PN);
   for(let j=0;j<PN;j++)for(let i=0;i<PN;i++){
     const idx=j*PN+i,c=cls[idx],x=(i+.5)*U,y=(j+.5)*U;let col;
     const pc=post(x,y);
@@ -981,11 +1695,12 @@ function renderTile(key){
       else if(i===0||j===0||i===PN-1||j===PN-1)col='#6f9a42';
     }else if(c===1){
       const dd=rd[idx];
-      if(dd===0)col='#6e5230';
+      if(brg[idx])col=dd<=0?'#4a3322':(((i>>1)+(j>>1))&1?'#c9b48d':'#b49d76');
+      else if(dd===0)col='#6e5230';
       else if(dd===1)col=(at(i-1,j)!==1||at(i,j-1)!==1)?'#e9d6a2':'#c4a468';
       else{const h=hash(i,j,sd+7);col=h<.08?'#cdb274':(h>.97?'#f0e2b5':'#e3cd92')}
-    }else if(c===3){
-      const edge=N4.some(n=>at(i+n[0],j+n[1])!==3);
+    }else if(c===3||c===4){
+      const edge=N4.some(n=>{const t=at(i+n[0],j+n[1]);return t!==3&&t!==4});
       const h=hash(i,j,sd+9);
       col=edge?'#2a5a98':(h<.12?'#6aaaee':(h>.9?'#3a78c4':'#4a8fd8'));
     }else{
@@ -995,8 +1710,22 @@ function renderTile(key){
       else if(dd===2)col=(((i>>1)+(j>>1))%2)?'#d9c9a2':'#c4b189';
       else if(dd===3)col='#b8a27a';
       else{
-        const r=j>>2,mortar=(j%4===0)||((i+(r%2)*3)%7===0);
-        col=mortar?'#b39c74':(hash(i,j,sd+3)<.14?'#c9b48d':(hash(i,j,sd+4)>.9?'#dcc8a2':'#d2bd98'));
+        const h1=hash(i,j,sd+3),h2=hash(i>>1,j>>1,sd+4);
+        col=h1<.12?'#7e6d48':(h2>.8?'#a8956d':'#94825c');
+      }
+    }
+    if(d.bridge){
+      const dx=x-50,dy=y-50,adx=Math.abs(dx),ady=Math.abs(dy);
+      if(adx<=7.5&&ady>9&&ady<=16) col=ady<=12?'#3a2a1c':'#5a4a30';
+      if(adx<=24&&ady<=9.6){
+        if(ady>8.4) col='#2b1d14';
+        else if(adx>22.4) col='#2b1d14';
+        else if(ady>6.4) col=dy<0?'#efe6cc':'#8a7a5a';
+        else col=(((i>>1)+(j>>1))&1)?'#d8cba8':'#c9bc98';
+      }
+      for(const px2 of [-22,22])for(const py2 of [-9,9]){
+        const r2=Math.hypot(dx-px2,dy-py2);
+        if(r2<=3.6) col=r2<=1.6?'#c9553a':(r2<=2.6?'#efe6cc':'#2b1d14');
       }
     }
     if(pc){col=pc;occ[idx]=1}
@@ -1013,10 +1742,33 @@ function renderTile(key){
   const mark=(i0,j0,w,h)=>{for(let y=0;y<h;y++)for(let x=0;x<w;x++)occ[(j0+y)*PN+i0+x]=1};
   const nearMon=(i,j,r)=>d.mon&&Math.hypot(i-PN/2,j-PN/2-1)<r;
   if(d.cities){
-    for(let gy=3;gy<PN-9;gy+=13)for(let gx=3;gx<PN-12;gx+=14){
-      if(hash(gx,gy,sd+11)>.55)continue;
-      const i0=gx+Math.floor(hash(gx,gy,sd+12)*4),j0=gy+Math.floor(hash(gx,gy,sd+13)*4);
-      if(free(i0,j0,11,7,(i,j)=>cls[j*PN+i]===2&&cd[j*PN+i]>=4)){stampPx(px,HOUSE,i0,j0,HP);mark(i0,j0,11,7)}
+    const TW=town(),picked=[];
+    let areaC=0;for(let q=0;q<N;q++)if(cls[q]===2)areaC++;
+    const maxTw=areaC>2600?2:(areaC>1300?1:0);
+    const cand=sC.filter(idx=>cls[idx]===2).sort((a,b2)=>hash(a,3,sd+50)-hash(b2,3,sd+50));
+    for(const idx of cand){
+      if(picked.length>=maxTw)break;
+      const i=idx%PN,j=(idx/PN)|0;
+      if(i<8||j<8||i>PN-9||j>PN-9)continue;
+      if(picked.some(q=>Math.hypot(q[0]-i,q[1]-j)<30))continue;
+      const pc=AN.city[cid[idx]-1];if(!pc)continue;
+      const dx=pc.p[0]/U-i,dy=pc.p[1]/U-j,l=Math.hypot(dx,dy)||1;
+      const i0=Math.round(i+dx/l*4)-4,j0=Math.round(j+dy/l*4)-14;
+      if(i0<0||j0<0||i0+8>PN)continue;
+      let bad=false;
+      for(let y=0;y<15&&!bad;y++)for(let x=0;x<8;x++){if(occ[(j0+y)*PN+i0+x]){bad=true;break}}
+      if(bad)continue;
+      picked.push([i,j]);stampBuf(px,TW.t,i0,j0);mark(i0,j0,8,15);
+    }
+    const inCity=(i,j)=>cls[j*PN+i]===2&&(cd[j*PN+i]<0||cd[j*PN+i]>=3);
+    for(let pass=0;pass<2;pass++)for(let gy=2+pass*2;gy<PN-6;gy+=5)for(let gx=1+pass*3;gx<PN-6;gx+=5){
+      if(hash(gx,gy,sd+11+pass)>.96)continue;
+      const k0=Math.floor(hash(gx,gy,sd+15)*TW.h.length);
+      for(let t=0;t<4;t++){
+        const hb=TW.h[(k0+t*7)%TW.h.length];
+        const i0=gx+Math.floor(hash(gx,gy,sd+12)*3)-1,j0=gy+Math.floor(hash(gx,gy,sd+13)*3)-1;
+        if(free(i0,j0,hb.w,hb.h,inCity)){stampBuf(px,hb,i0,j0);mark(i0,j0,hb.w,hb.h);break}
+      }
     }
   }
   for(let gy=2;gy<PN-10;gy+=14)for(let gx=2;gx<PN-10;gx+=14){
@@ -1128,23 +1880,31 @@ function shieldPos(sd){
 }
 function baseFeatures(type,farm){
   const d=T[type],f=[],m=d.mods||{};
-  (d.cities||[]).forEach((s,i)=>f.push(Object.assign({kind:'city',sides:s.slice(),shield:!!(d.shield&&i===0)},(m.city||{})[i]||{})));
-  (d.roads||[]).forEach((s,i)=>f.push(Object.assign({kind:'road',sides:s.slice(),shield:false},(m.road||{})[i]||{})));
-  if(d.mon) f.push({kind:'mon',sides:[],shield:false});
+  (d.cities||[]).forEach((s,i)=>f.push(Object.assign({kind:'city',ci:i,sides:s.slice(),shield:!!(d.shield&&i===0)},(m.city||{})[i]||{})));
+  (d.roads||[]).forEach((s,i)=>f.push(Object.assign({kind:'road',ri:i,sides:s.slice(),shield:false},(m.road||{})[i]||{})));
+  if(d.mon) f.push({kind:'mon',gp:d.mp||null,sides:[],shield:false});
   if(d.garden) f.push({kind:'mon',garden:true,gp:d.gp,sides:[],shield:false});
-  if(farm) (d.fields||[]).forEach(q=>f.push({kind:'field',sides:[],shield:false,segs:parseSegs(q.s),adj:(q.c||[]).slice(),anchor:q.a}));
+  if(farm) (d.fields||[]).forEach((q,qi)=>f.push({kind:'field',fi:qi,sides:[],shield:false,segs:parseSegs(q.s),adj:(q.c||[]).slice(),anchor:q.a}));
   return f;
 }
 function makeTile(type,rot,player,farm){
   const d=T[type],e=d.e,feats=[],marks=[];
   baseFeatures(type,farm!==false).forEach(f=>{
-    const a=rotPt(f.kind==='field'?f.anchor:(f.gp||anchorOf(f)),rot);
+    const A=ANC[d.art||type];
+    let base=null;
+    if(f.gp) base=f.gp;
+    else if(A&&f.kind==='city'&&A.city[f.ci]) base=A.city[f.ci].p;
+    else if(A&&f.kind==='road'&&A.road[f.ri]) base=A.road[f.ri].p;
+    else if(A&&f.kind==='field'&&A.field[f.fi]) base=A.field[f.fi];
+    else base=f.kind==='field'?f.anchor:anchorOf(f);
+    const a=rotPt(base,rot);
     const o={kind:f.kind,sides:f.sides.map(s=>(s+rot)%4),shield:f.shield,ax:a[0],ay:a[1],garden:!!f.garden,nm:!!f.nm};
-    if(f.kind==='field'){o.segs=f.segs.map(q=>[(q[0]+rot)%4,q[1]]);o.adj=f.adj}
-    if(f.shield){const sp=rotPt(shieldPos(f.sides),rot);o.sx=sp[0];o.sy=sp[1]}
-    if(f.inn){o.inn=true;marks.push({k:'inn',p:a})}
+    if(f.kind==='field'){o.segs=f.segs.map(q=>[(q[0]+rot)%4,q[1]]);o.adj=f.adj;o.fidx=f.fi}
+    const cA=A&&f.kind==='city'&&A.city[f.ci]?A.city[f.ci]:null;
+    if(f.shield){const sp=rotPt(cA?cA.s1:shieldPos(f.sides),rot);o.sx=sp[0];o.sy=sp[1]}
+    if(f.inn){o.inn=true;const rA=A&&A.road[f.ri];marks.push({k:'inn',p:rotPt(rA?rA.inn:f.gp||anchorOf(f),rot)})}
     if(f.cath||f.goods){
-      const sp=rotPt(shieldPos(f.sides),rot);
+      const sp=rotPt(cA?(f.shield?cA.s2:cA.s1):shieldPos(f.sides),rot);
       if(f.cath){o.cath=true;marks.push({k:'cath',p:sp})}
       if(f.goods){o.goods=f.goods;marks.push({k:f.goods,p:sp})}
     }
@@ -1153,35 +1913,158 @@ function makeTile(type,rot,player,farm){
   if(d.gold) marks.push({k:'gold',p:rotPt([84,14],rot)});
   if(d.magic) marks.push({k:'hat',p:rotPt([16,84],rot)});
   if(d.crop) marks.push({k:'cc_'+d.crop,p:rotPt(d.cp,rot)});
-  return {type,rot,player,feats,marks,gold:!!d.gold,magic:!!d.magic,crop:d.crop||null,lake:!!d.lake,ferry:null,edges:[0,1,2,3].map(s=>e[(s-rot+4)%4])};
+  let flyI=null;
+  if(d.fly){let v=d.fly.slice();for(let r=0;r<rot;r++)v=[-v[1],v[0]];const fp=rotPt(d.fp,rot);flyI={dir:v,pos:fp};marks.push({k:'fly',p:fp,ang:Math.round(Math.atan2(v[1],v[0])*180/Math.PI-180)})}
+  return {type,rot,player,feats,marks,gold:!!d.gold,magic:!!d.magic,crop:d.crop||null,lake:!!d.lake,ferry:null,fly:flyI,edges:[0,1,2,3].map(s=>e[(s-rot+4)%4])};
 }
 
 /* =====================================================================
  * SVG 定义与绘制
  * ===================================================================== */
+const DEFD={};
+function addTileDefs(exps){
+  exps=exps||[];let out='';
+  for(const k in T){
+    const d=T[k];if(d.art||DEFD[k])continue;
+    if(d.ext&&exps.indexOf(d.ext)<0)continue;
+    DEFD[k]=1;out+=`<g id="t-${k}"><image width="100" height="100" href="${renderTile(k)}"/></g>`;
+  }
+  if(out) $('defs').insertAdjacentHTML('beforeend',out);
+}
 function buildDefs(){
   mkSprites();
   let s='';
   for(const k in SPR) s+=`<image id="s-${k}" width="${SZ[k][0].toFixed(2)}" height="${SZ[k][1].toFixed(2)}" href="${SPR[k].url}"/>`;
-  for(const k in T) if(!T[k].art) s+=`<g id="t-${k}"><image width="100" height="100" href="${renderTile(k)}"/></g>`;
+  PCOL.forEach((c,i)=>{s+=`<filter id="tint${i}" x="0" y="0" width="1" height="1" color-interpolation-filters="sRGB"><feFlood flood-color="${c}" flood-opacity=".5"/><feComposite in2="SourceAlpha" operator="in"/></filter>`});
   $('defs').innerHTML=s;
+  addTileDefs([]);
   const root=document.documentElement.style;
   root.setProperty('--wood-url',`url(${woodURL()})`);
   root.setProperty('--parch-url',`url(${parchURL()})`);
 }
 function useS(k,cx,cy,extra){return `<use href="#s-${k}" x="${(cx-SZ[k][0]/2).toFixed(1)}" y="${(cy-SZ[k][1]/2).toFixed(1)}"${extra||''}/>`}
+const SHEETS=[["A", "B", "C", "D"], ["E", "F", "G", "H"], ["I", "J", "K", "L"], ["M", "N", "O", "P"], ["Q", "R", "S", "T"], ["U", "V", "W", "X"], ["Ia", "Ib", "Ic", "Id"], ["Ie", "If", "Ig", "Ih"], ["Ii", "Ij", "Ka", "Kb"], ["Il", "Im", "In", "Io"], ["Ip", "Iq", "HA", "HB"], ["HC", "HD", "HE", "HF"], ["HG", "HH", "HI", "HJ"], ["HK", "HL", "HM", "HN"], ["HO", "HP", "HQ", "HR"], ["HS", "HT", "HU", "HV"], ["HW", "HX", "Rv1", "Rv2"], ["Rv3", "Rv4", "Rv5", "Rv6"], ["Rv7", "Rv8", "Rv9", "Rv10"], ["Rv11", "Rv12", "Fa", "Fb"], ["Fc", "Fd", "Fe", "Ff"], ["Fg", "Fh", "Ga", "Gb"], ["Gc", "Gd", "Ge", "Gf"], ["Gg", "Gh", "Ma", "Mb"], ["Mc", "Md", "Me", "Mf"], ["Mg", "Mh", "Ca", "Cb"], ["Cc", "Cd", "Ce", "Cf"], ["gE", "gH", "gI", "gM"], ["gN", "gR", "gU", "gV"], ["Fla", "Flb", "Flc", "Fld"], ["Fle", "Flf", "Flg", "Flh"]];
+const OVR={};
+function tileOverlays(type,t){
+  t=t||makeTile(type,0,-1,false);
+  const out=[];
+  if(T[type].mon){const mp=T[type].mp||[50,52];out.push(['mon',mp[0],mp[1]])}
+  for(const f of t.feats) if(f.shield) out.push(['shield',f.sx,f.sy]);
+  for(const f of t.feats) if(f.garden) out.push(['garden',f.ax,f.ay]);
+  for(const m of t.marks){const z=SZ[m.k];out.push([m.k,clamp(m.p[0],z[0]/2+2,98-z[0]/2),clamp(m.p[1],z[1]/2+2,98-z[1]/2),m.ang])}
+  return out;
+}
 function tileG(type,rot,x,y,t){
   t=t||makeTile(type,rot,-1,false);
+  if(OVR[type]) return `<g transform="translate(${x*100} ${y*100})"><use href="#o-${type}" transform="rotate(${rot*90} 50 50)"/></g>`;
   const art=T[type].art||type;
   let s=`<g transform="translate(${x*100} ${y*100})"><use href="#t-${art}" transform="rotate(${rot*90} 50 50)"/>`;
-  if(T[type].mon) s+=useS('mon',50,52);
-  for(const f of t.feats) if(f.shield) s+=useS('shield',f.sx,f.sy);
-  for(const f of t.feats) if(f.garden) s+=useS('garden',f.ax,f.ay);
-  for(const m of t.marks){const z=SZ[m.k];s+=useS(m.k,clamp(m.p[0],z[0]/2+2,98-z[0]/2),clamp(m.p[1],z[1]/2+2,98-z[1]/2))}
+  tileOverlays(type,t).forEach(o=>{s+=useS(o[0],o[1],o[2],o[3]!=null?` transform="rotate(${o[3]} ${o[1].toFixed(1)} ${o[2].toFixed(1)})"`:'')});
   return s+'</g>';
 }
-function meepleG(p,px,py,sc,lying,cls,id){
-  const u=useS('mp'+p,0,0);
+let artTimer=0;
+function setOverride(id,url,raw){
+  OVR[id]=url||'raw';
+  const html=`<g id="o-${id}">${raw||`<image width="100" height="100" href="${url}" style="image-rendering:auto"/>`}</g>`,el=document.getElementById('o-'+id);
+  if(el) el.outerHTML=html;else $('defs').insertAdjacentHTML('beforeend',html);
+  clearTimeout(artTimer);
+  artTimer=setTimeout(()=>{if(G&&$('lobby').hidden)render();updateArtNote()},60);
+}
+function updateArtNote(){const e=$('artNote');if(e){const n=Object.keys(OVR).length;e.textContent=n?`已载入 ${n} 张自定义地块图（含覆盖层，已整体替换）`:'未导入自定义地块图'}}
+function artDB(cb){
+  try{const r=indexedDB.open('kks-art',1);r.onupgradeneeded=()=>r.result.createObjectStore('tiles');r.onsuccess=()=>cb(r.result);r.onerror=()=>cb(null)}catch(e){cb(null)}
+}
+function loadArtDB(){
+  artDB(db=>{
+    if(!db) return;
+    const rq=db.transaction('tiles').objectStore('tiles').openCursor();
+    rq.onsuccess=()=>{const c=rq.result;if(c){if(T[c.key])setOverride(c.key,c.value);c.continue()}else updateArtNote()};
+  });
+}
+function saveArt(id,url){artDB(db=>{if(db)db.transaction('tiles','readwrite').objectStore('tiles').put(url,id)})}
+function clearArt(){
+  artDB(db=>{if(db)db.transaction('tiles','readwrite').objectStore('tiles').clear()});
+  Object.keys(OVR).forEach(k=>{delete OVR[k];const el=document.getElementById('o-'+k);if(el)el.remove()});
+  updateArtNote();if(G&&$('lobby').hidden)render();
+}
+function normArt(file){
+  return new Promise((res,rej)=>{
+    const u=URL.createObjectURL(file),im=new Image();
+    im.onload=()=>{
+      const cv=document.createElement('canvas');cv.width=cv.height=512;
+      const sz=Math.min(im.width,im.height);
+      cv.getContext('2d').drawImage(im,(im.width-sz)/2,(im.height-sz)/2,sz,sz,0,0,512,512);
+      URL.revokeObjectURL(u);res(cv.toDataURL('image/png'));
+    };
+    im.onerror=()=>{URL.revokeObjectURL(u);rej(new Error('load'))};im.src=u;
+  });
+}
+function cropSq(im,sx,sy,sw,sh){
+  const cv=document.createElement('canvas');cv.width=cv.height=512;
+  const sz=Math.min(sw,sh);
+  cv.getContext('2d').drawImage(im,sx+(sw-sz)/2,sy+(sh-sz)/2,sz,sz,0,0,512,512);
+  return cv.toDataURL('image/png');
+}
+function quadOf(q,im){const w=im.width/2,h=im.height/2;return [(q%2)*w,((q/2)|0)*h,w,h]}
+function sheetName(n){return 'S'+String(n+1).padStart(2,'0')}
+function applySheet(im,n,src,only){
+  SHEETS[n].forEach((id,q)=>{
+    if(only&&!only(id)) return;
+    const r=quadOf(q,im);
+    try{const url=cropSq(im,r[0],r[1],r[2],r[3]);setOverride(id,url);if(!src)saveArt(id,url)}
+    catch(e){
+      if(!src) return;
+      const sz=Math.min(r[2],r[3]),sx=r[0]+(r[2]-sz)/2,sy=r[1]+(r[3]-sz)/2;
+      setOverride(id,null,`<svg width="100" height="100" viewBox="${sx} ${sy} ${sz} ${sz}" overflow="hidden"><image href="${src}" width="${im.width}" height="${im.height}" style="image-rendering:auto"/></svg>`);
+    }
+  });
+}
+function loadFileImg(file){
+  return new Promise((res,rej)=>{const u=URL.createObjectURL(file),im=new Image();im.onload=()=>res({im,u});im.onerror=()=>{URL.revokeObjectURL(u);rej(new Error('load'))};im.src=u});
+}
+const SPROBED={};
+function probeSheets(exps){
+  SHEETS.forEach((ids,n)=>{
+    if(SPROBED[n]) return;
+    const need=id=>!T[id].ext||exps.indexOf(T[id].ext)>=0;
+    if(!ids.some(need)) return;
+    SPROBED[n]=1;
+    const im=new Image(),src='tiles/'+sheetName(n)+'.png';
+    im.onload=()=>applySheet(im,n,src,id=>need(id)&&!OVR[id]);
+    im.src=src;
+  });
+}
+async function importArt(files){
+  const keys=Object.keys(T);let ok=0;const miss=[];
+  for(const f of files){
+    const base=f.name.replace(/\.[^.]+$/,'');
+    const sm=/^S(\d{1,2})(?!\d)/i.exec(base);
+    let sn=sm?+sm[1]-1:-1;
+    const id=T[base]?base:keys.find(k=>k.toLowerCase()===base.toLowerCase());
+    if(!id&&!(sn>=0&&sn<SHEETS.length)){
+      const ans=parseInt(prompt(`文件「${f.name}」是第几张四拼一图？（1–${SHEETS.length}，取消则跳过）`),10);
+      if(ans>=1&&ans<=SHEETS.length) sn=ans-1;
+    }
+    if(!id&&sn>=0&&sn<SHEETS.length){
+      try{const r=await loadFileImg(f);applySheet(r.im,sn,null,null);URL.revokeObjectURL(r.u);ok+=SHEETS[sn].length}catch(e){miss.push(f.name)}
+      continue;
+    }
+    if(!id){miss.push(f.name);continue}
+    try{const url=await normArt(f);setOverride(id,url);saveArt(id,url);ok++}catch(e){miss.push(f.name)}
+  }
+  lobbyErr(miss.length?`已导入 ${ok} 张；未能识别：${miss.slice(0,6).join('、')}${miss.length>6?' 等':''}`:`已导入 ${ok} 张自定义地块图`);
+}
+const PROBED={};
+function probeArt(exps){
+  for(const k in T){
+    if(PROBED[k]||OVR[k]) continue;
+    if(T[k].ext&&exps.indexOf(T[k].ext)<0) continue;
+    PROBED[k]=1;
+    const im=new Image();im.onload=()=>{if(!OVR[k])setOverride(k,'tiles/'+k+'.png')};im.src='tiles/'+k+'.png';
+  }
+}
+function meepleG(p,px,py,sc,lying,cls,id,kind){
+  const u=useS(fk(kind,p),0,0);
   return `<g${id?` id="${id}"`:''} transform="translate(${px.toFixed(1)} ${py.toFixed(1)}) scale(${sc})"><g${cls?` class="${cls}"`:''}>`+(lying?`<g transform="rotate(90)">${u}</g>`:u)+`</g></g>`;
 }
 
@@ -1194,17 +2077,23 @@ const has=id=>G.cfg.exps.indexOf(id)>=0;
 function freshState(seed,mode,me,cfg){
   cfg=Object.assign({},DEFCFG,cfg||{});
   if(!Array.isArray(cfg.exps)) cfg.exps=[];
+  addTileDefs(cfg.exps);
+  probeArt(cfg.exps);
+  probeSheets(cfg.exps);
   const rnd=mulberry32(seed>>>0),deck=[];
   for(const k in T){
+    if(T[k].river) continue;
     if(T[k].ext&&cfg.exps.indexOf(T[k].ext)<0) continue;
     const n=T[k].n-(k==='D'?1:0);for(let i=0;i<n;i++)deck.push(k);
   }
   for(let i=deck.length-1;i>0;i--){const j=(rnd()*(i+1))|0;const t=deck[i];deck[i]=deck[j];deck[j]=t}
+  const riv=cfg.exps.indexOf('river')>=0;
+  if(riv){const rs=['Rv2','Rv3','Rv4','Rv5','Rv6','Rv7','Rv8','Rv9','Rv10','Rv11'];for(let i=rs.length-1;i>0;i--){const j=(rnd()*(i+1))|0;const t=rs[i];rs[i]=rs[j];rs[j]=t}deck.push('Rv12');rs.forEach(k=>deck.push(k))}
   const big=cfg.exps.indexOf('inn')>=0?1:0;
   const first=rnd()<.5?0:1;
-  return {seed,mode,me,cfg,deck,first,total:deck.length,cellRot:{},board:{'0,0':makeTile('D',0,-1,cfg.farmers)},
+  return {seed,mode,me,cfg,deck,first,total:deck.length,cellRot:{},board:{'0,0':makeTile(riv?'Rv1':'D',0,-1,cfg.farmers)},river:riv?{open:[0,1,2],last:null}:null,
     players:[0,1].map(i=>({name:PNAME[i],color:PCOL[i],score:0,meeples:7,big,gold:0,ab:cfg.exps.indexOf('abbot')>=0?1:0,bld:cfg.exps.indexOf('goods')>=0?1:0,pig:cfg.exps.indexOf('goods')>=0?1:0,goods:{wine:0,grain:0,cloth:0}})),
-    allOpts:{m:[],b:[],p:[],a:[]},magic:{mage:null,witch:null},ingot:{},ferries:8,pre:[],post:[],fused:[],ftiles:[],fcand:[],fsel:null,fa:null,mfig:null,gopts:[],copts:[],cchoice:null,cropT:null,cropActor:null,cq:[],msgs:[],fig:null,second:false,dbl:false,
+    fopts:[],flyBig:false,flyRoll:0,stats:[{},{}],allOpts:{m:[],b:[],p:[],a:[]},magic:{mage:null,witch:null},ingot:{},ferries:8,pre:[],post:[],fused:[],ftiles:[],fcand:[],fsel:null,fa:null,mfig:null,gopts:[],copts:[],cchoice:null,cropT:null,cropActor:null,cq:[],msgs:[],fig:null,second:false,dbl:false,
     meeples:[],turn:first,cur:null,curRot:0,phase:'place',legal:{},hover:null,sel:null,bigSel:false,pos:null,opts:[],last:[0,0],
     log:[],toasts:[],acts:[],t0:Date.now(),warned:false,nextRemind:0,fx:{tile:null,meeple:null,scores:[],flash:[],waves:[],freed:[]}};
 }
@@ -1215,6 +2104,14 @@ function canAct(){return myTurn()&&netOK()&&!G.over&&!COIN}
 
 function validAt(type,rot,x,y){
   if(G.board[x+','+y]) return false;
+  if(T[type].river){
+    const r=G.river;
+    if(!r||!r.open||r.open[0]!==x||r.open[1]!==y) return false;
+    const rv=T[type].rv.map(q=>(q+rot)%4),ent=(r.open[2]+2)%4;
+    if(!rv.includes(ent)) return false;
+    const ex=rv.find(q=>q!==ent);
+    if(ex!==undefined&&ex!==r.open[2]&&r.last!==null&&((ex-r.open[2]+4)%4)===r.last) return false;
+  }
   const e=T[type].e;let touch=false;
   for(let s=0;s<4;s++){
     const nb=G.board[(x+DX[s])+','+(y+DY[s])];
@@ -1242,7 +2139,7 @@ function legalMap(type){
   return m;
 }
 function startTurn(){
-  G.pos=null;G.opts=[];G.allOpts={m:[],b:[],p:[],a:[]};G.fig=null;G.pre=[];G.post=[];G.fused=[];G.ftiles=[];G.fcand=[];G.fsel=null;G.fa=null;G.mfig=null;G.hover=null;G.sel=null;G.bigSel=false;G.curRot=0;G.cellRot={};
+  G.pos=null;G.opts=[];G.allOpts={m:[],b:[],p:[],a:[]};G.fig=null;G.fopts=[];G.chooseN=null;G.pre=[];G.post=[];G.fused=[];G.ftiles=[];G.fcand=[];G.fsel=null;G.fa=null;G.mfig=null;G.hover=null;G.sel=null;G.bigSel=false;G.curRot=0;G.cellRot={};
   G.t0=Date.now();G.warned=false;G.nextRemind=0;
   for(;;){
     if(!G.deck.length){endGame();return}
@@ -1346,7 +2243,8 @@ function award(c,final){
   if(top>0){
     win.forEach((p,i)=>{G.players[p].score+=gain[i]});
     const same=gain.every(v=>v===gain[0]);
-    const msg=(same?`${win.map(p=>G.players[p].name).join('、')} +${gain[0]}`:win.map((p,i)=>`${G.players[p].name} +${gain[i]}`).join('，'))+`（${KN[c.kind]}${final?'终局结算':'完成'}）`;
+    const note=c.meeples.some(m=>m.b||m.pig)?`；随从数 ${cnt[0]}:${cnt[1]}，建筑师与猪不计入`:'';
+    const msg=(same?`${win.map(p=>G.players[p].name).join('、')} +${gain[0]}`:win.map((p,i)=>`${G.players[p].name} +${gain[i]}`).join('，'))+`（${KN[c.kind]}${final?'终局结算':'完成'}${note}）`;
     addLog(msg);G.toasts.push(msg);
     if(!REPLAY){
       const lx=G.last[0],ly=G.last[1],dd=k=>{const p=k.split(',').map(Number);return Math.abs(p[0]-lx)+Math.abs(p[1]-ly)};
@@ -1366,6 +2264,13 @@ function award(c,final){
       const m2=`金锭：${[0,1].filter(p=>got[p]).map(p=>`${G.players[p].name}×${got[p]}`).join('、')}`;
       addLog(m2);G.toasts.push(m2);
     }
+  }
+  if(top>0) win.forEach((p,i)=>{G.stats[p][c.kind]=(G.stats[p][c.kind]||0)+gain[i]});
+  if(final&&G.finalSteps&&top>0){
+    const keys=new Set(c.tileSet);
+    if(c.kind==='mon') for(let dx=-1;dx<=1;dx++)for(let dy=-1;dy<=1;dy++){const k=(c.x+dx)+','+(c.y+dy);if(G.board[k])keys.add(k)}
+    G.finalSteps.push({kind:c.kind,tiles:Array.from(keys),meeples:c.meeples.map(m=>Object.assign({},m)),win:win.slice(),gain:gain.slice(),
+      text:`${win.map((p,i)=>`${G.players[p].name} +${gain[i]}`).join('，')}　${KN[c.kind]}`,scores:G.players.map(q=>q.score)});
   }
   if(!REPLAY) c.meeples.forEach(m=>G.fx.freed.push({p:m.p,x:m.x,y:m.y,fi:m.fi,big:m.big}));
   c.meeples.forEach(m=>{const pl=G.players[m.p];if(m.b)pl.bld++;else if(m.ab)pl.ab++;else if(m.pig)pl.pig++;else if(m.big)pl.big++;else pl.meeples++});
@@ -1408,10 +2313,13 @@ function countComplete(kind){
   }
   return n;
 }
+const KRANK={road:0,mon:1,city:2,field:3};
 function endGame(){
   G.phase='over';G.over=true;G.cur=null;G.legal={};
+  G.preFinal=G.players.map(p=>p.score);G.finalSteps=[];G.finalMeeples=G.meeples.map(m=>Object.assign({},m));
   const done=new Set();
-  for(const m of G.meeples.slice()){
+  const order=G.meeples.slice().sort((a,b)=>KRANK[G.board[a.x+','+a.y].feats[a.fi].kind]-KRANK[G.board[b.x+','+b.y].feats[b.fi].kind]);
+  for(const m of order){
     if(done.has(m.x+','+m.y+','+m.fi)) continue;
     const c=comp(m.x,m.y,m.fi);
     c.nodes.forEach(n=>done.add(n));
@@ -1421,21 +2329,27 @@ function endGame(){
     for(const g in GOODS){
       const a=G.players[0].goods[g],b=G.players[1].goods[g],mx=Math.max(a,b);
       if(mx<1) continue;
-      [0,1].forEach(p=>{if(G.players[p].goods[g]===mx){G.players[p].score+=10;addLog(`${G.players[p].name}的${GOODS[g]}最多 +10`)}});
+      [0,1].forEach(p=>{if(G.players[p].goods[g]===mx){G.players[p].score+=10;G.stats[p].other=(G.stats[p].other||0)+10;addLog(`${G.players[p].name}的${GOODS[g]}最多 +10`);bonusStep(p,10,`${GOODS[g]}最多`)}});
     }
   }
   if(has('gold')){
-    [0,1].forEach(p=>{const n=G.players[p].gold,v=n>=10?4:n>=7?3:n>=4?2:n>=1?1:0;if(n){G.players[p].score+=n*v;addLog(`${G.players[p].name}的 ${n} 个金锭，每个 ${v} 分，共 +${n*v}`)}});
+    [0,1].forEach(p=>{const n=G.players[p].gold,v=n>=10?4:n>=7?3:n>=4?2:n>=1?1:0;if(n){G.players[p].score+=n*v;G.stats[p].other=(G.stats[p].other||0)+n*v;addLog(`${G.players[p].name}的 ${n} 个金锭，每个 ${v} 分，共 +${n*v}`);bonusStep(p,n*v,`${n} 个金锭×${v}`)}});
   }
   addLog('牌堆耗尽，终局结算完成');
-  if(!REPLAY){LS.del(SKEY);if(typeof showEnd==='function')showEnd()}
+  if(!REPLAY){LS.del(SKEY);startFinalShow()}
 }
+function bonusStep(p,pts,what){G.finalSteps.push({kind:'bonus',tiles:[],meeples:[],win:[p],gain:[pts],text:`${G.players[p].name}的${what} +${pts}`,scores:G.players.map(q=>q.score)})}
 
 function doPlace(x,y,rot){
   if(!G||G.phase!=='place'||!G.cur||!validAt(G.cur,rot,x,y)) return false;
   const tile=makeTile(G.cur,rot,G.turn,G.cfg.farmers),pl=G.players[G.turn];
   G.acts.push({t:'place',x,y,rot});
-  G.board[x+','+y]=tile;G.last=[x,y];G.cur=null;G.legal={};G.hover=null;G.sel=null;
+  G.board[x+','+y]=tile;G.last=[x,y];
+  if(T[tile.type].river&&G.river&&G.river.open){
+    const r=G.river,rv=T[tile.type].rv.map(q=>(q+rot)%4),ent=(r.open[2]+2)%4,ex=rv.find(q=>q!==ent);
+    if(ex===undefined) r.open=null;
+    else{if(ex!==r.open[2]) r.last=(ex-r.open[2]+4)%4;r.open=[x+DX[ex],y+DY[ex],ex]}
+  }G.cur=null;G.legal={};G.hover=null;G.sel=null;
   G.phase='meeple';G.pos=[x,y];G.opts=[];G.allOpts={m:[],b:[],p:[],a:[]};G.fig=null;G.dbl=false;G.bigSel=false;
   addLog(`${pl.name}放下地块`);
   if(!REPLAY) G.fx.tile=[x,y];
@@ -1466,7 +2380,7 @@ function doPlace(x,y,rot){
   if(!REPLAY){saveSession();render()}
   return true;
 }
-function noMeepleOpts(){return !(G.allOpts.m.length||G.allOpts.b.length||G.allOpts.p.length||G.allOpts.a.length||(has('abbot')&&G.meeples.some(m=>m.ab&&m.p===G.turn)))}
+function noMeepleOpts(){const pl0=G.players[G.turn],ft=G.pos&&G.board[G.pos[0]+','+G.pos[1]];if(has('fly')&&ft&&ft.fly&&(pl0.meeples>0||(has('inn')&&pl0.big>0))) return false;return !(G.allOpts.m.length||G.allOpts.b.length||G.allOpts.p.length||G.allOpts.a.length||(has('abbot')&&G.meeples.some(m=>m.ab&&m.p===G.turn)))}
 function enterPre(mine){
   while(G.pre.length){
     const ph=G.pre.shift();
@@ -1535,13 +2449,37 @@ function doMagic(a){
   if(!REPLAY){saveSession();render()}
   return true;
 }
+function doFlySel(a){
+  if(!G||G.phase!=='fly') return false;
+  const o=G.fopts[a.i];if(!o) return false;
+  G.acts.push({t:'flysel',i:a.i});
+  finishTurn(o,G.flyBig,undefined);
+  if(!REPLAY){saveSession();render()}
+  return true;
+}
 function doMeeple(opt,big,fig){
   if(!G||G.phase!=='meeple') return false;
+  if(fig==='fly'){
+    const pl0=G.players[G.turn],t0=G.board[G.pos[0]+','+G.pos[1]];
+    if(!has('fly')||!t0.fly||(big?pl0.big<1:pl0.meeples<1)) return false;
+    const rnd=mulberry32(((G.seed*2654435761)^(G.acts.length*40503+7))>>>0),roll=1+Math.floor(rnd()*3);
+    G.acts.push({t:'meeple',f:'fly',big:!!big});
+    const tx=G.pos[0]+t0.fly.dir[0]*roll,ty=G.pos[1]+t0.fly.dir[1]*roll,tt=G.board[tx+','+ty];
+    G.flyBig=!!big;G.flyRoll=roll;
+    addLog(`${pl0.name}的飞行器掷出 ${roll}`);
+    const opts=[];
+    if(tt) tt.feats.forEach((f,i)=>{if(f.kind==='field'||f.garden||f.nm)return;const c=comp(tx,ty,i);if(!c.complete)opts.push({x:tx,y:ty,fi:i})});
+    if(!opts.length){addLog('飞行器落空，随从返回');if(!REPLAY)toast(`飞行器掷出 ${roll}：没有可降落的要素，随从返回`,2600);finishTurn(null,false)}
+    else if(opts.length===1){addLog('飞行器降落');finishTurn(opts[0],!!big,undefined)}
+    else{G.fopts=opts;G.phase='fly';if(!REPLAY)focusKeys([tx+','+ty,G.pos[0]+','+G.pos[1]])}
+    if(!REPLAY){saveSession();render()}
+    return true;
+  }
   if(fig==='ret'){
     const am=G.meeples.find(m=>m.ab&&m.p===G.turn),pl0=G.players[G.turn];
     if(!am) return false;
     const pts0=pointsOf(comp(am.x,am.y,am.fi));
-    pl0.score+=pts0;pl0.ab++;G.meeples=G.meeples.filter(m=>m!==am);
+    pl0.score+=pts0;G.stats[G.turn].mon=(G.stats[G.turn].mon||0)+pts0;pl0.ab++;G.meeples=G.meeples.filter(m=>m!==am);
     addLog(`${pl0.name}收回院长，得 ${pts0} 分`);
     G.acts.push({t:'meeple',f:'ret'});
     finishTurn(null,false);
@@ -1728,6 +2666,8 @@ function applyAct(a){
   if(a.t==='fplace'||a.t==='fmove'||a.t==='fskip') return doFerry(a);
   if(a.t==='cchoice'||a.t==='cact') return doCrop(a);
   if(a.f==='ret') return doMeeple(null,false,'ret');
+  if(a.f==='fly') return doMeeple(null,!!a.big,'fly');
+  if(a.t==='flysel') return doFlySel(a);
   if(a.fi===null||a.fi===undefined) return doMeeple(null,false);
   return doMeeple({x:a.x==null?G.pos[0]:a.x|0,y:a.y==null?G.pos[1]:a.y|0,fi:a.fi|0},!!a.big,a.f);
 }
@@ -1795,8 +2735,8 @@ function panelFx(){
   if(!window.anime||reduceMotion()) return;
   if(UIS.seed!==G.seed){UIS.seed=G.seed;UIS.sc=[0,0];UIS.turn=-1}
   G.players.forEach((p,i)=>{
-    if(p.score>UIS.sc[i]) A({targets:$$(`.pl[data-p="${i}"] .plScore,.chip[data-p="${i}"] b`),scale:[1,1.5,1],duration:520,easing:'easeOutQuad'});
-    UIS.sc[i]=p.score;
+    if(dscore(i)>UIS.sc[i]) A({targets:$$(`.pl[data-p="${i}"] .plScore,.chip[data-p="${i}"] b`),scale:[1,1.5,1],duration:520,easing:'easeOutQuad'});
+    UIS.sc[i]=dscore(i);
   });
   if(UIS.turn!==G.turn){
     UIS.turn=G.turn;
@@ -1842,20 +2782,110 @@ function turnBanner(){
     banTimer=setTimeout(()=>{if(!A({targets:inn,translateX:['0%','130%'],opacity:[1,0],duration:300,easing:'easeInQuad',complete:done}))done()},1150);
   }else banTimer=setTimeout(done,1100);
 }
+/* 落地迸射的金色碎光 */
+function coinBurst(box,n){
+  box.innerHTML='';
+  for(let i=0;i<n;i++){
+    const s=document.createElement('i');s.className='coinSpark';box.appendChild(s);
+    const a=(i/n)*Math.PI*2+Math.random()*.4,r=52+Math.random()*74;
+    A({targets:s,translateX:[0,Math.cos(a)*r],translateY:[0,Math.sin(a)*r*.6],
+      opacity:[{value:1,duration:70},{value:0,duration:520}],
+      scale:[{value:1.3,duration:90},{value:.2,duration:500}],
+      rotate:[0,(Math.random()*220-110)|0],delay:i*11,duration:600,easing:'easeOutQuad'});
+  }
+}
 function coinFlip(first,cb){
   if(window.NOCOIN||!window.anime||reduceMotion()){cb&&cb();return}
   COIN=true;
-  const el=$('coin');el.hidden=false;
-  $('coinFront').src=SPR.coin0.url;$('coinBack').src=SPR.coin1.url;
-  $('coinTxt').textContent='抛硬币决定先手…';
-  const finish=()=>{
-    $('coinTxt').textContent=`${G.players[first].name}先手！`;sfx('turn');
-    setTimeout(()=>{el.hidden=true;COIN=false;if(G)render();cb&&cb()},950);
+  const el=$('coin'),box=$('coinBox'),wrap=$('coinWrap'),squash=$('coinSquash'),
+        face=$('coinFace'),front=$('coinFront'),back=$('coinBack'),txt=$('coinTxt'),hint=$('coinHint'),
+        shadow=$('coinShadow'),glow=$('coinGlow'),impact=$('coinImpact'),sparks=$('coinSparks');
+  const p=G.players[first],endDeg=1800+(first?180:0);
+  front.src=SPR.coin0.url;back.src=SPR.coin1.url;
+  /* 按角度同步：正反面切换 + 侧边厚度（投影位移的金色轮廓，随 sin 变宽）
+     filter 每次改动都会重建滤镜链，这里把位移量化到整像素并缓存，
+     整圈旋转只会真正写入约 26 次，避免每帧重绘拖慢低端机 */
+  let lastDx=null,lastSide=null;
+  const syncDeg=deg=>{
+    const rad=deg*Math.PI/180,c=Math.cos(rad),sn=Math.sin(rad);
+    const frontSide=c>=0;
+    if(frontSide!==lastSide){
+      lastSide=frontSide;
+      front.style.visibility=frontSide?'visible':'hidden';
+      back.style.visibility=frontSide?'hidden':'visible';
+    }
+    const dx=Math.round(-13*sn);
+    if(dx===lastDx)return;
+    lastDx=dx;
+    squash.style.filter=dx===0?'':'drop-shadow('+dx+'px 0 0 #9a6f14)';
   };
+  const faceSwap=()=>{
+    const m=/rotateY\((-?[\d.]+)deg\)/.exec(face.style.transform);
+    syncDeg(m?parseFloat(m[1]):0);
+  };
+  if(window.anime.remove)window.anime.remove([box,wrap,squash,face,shadow,glow,impact,el]);
+  el.hidden=false;el.style.opacity='';el.classList.add('on');
+  box.style.opacity='';box.style.transform='';
+  wrap.style.transform='translateY(0px)';
+  squash.style.transform='';squash.style.filter='';
+  face.style.transform='rotateY(0deg)';syncDeg(0);
+  shadow.style.transform='scaleX(.85)';shadow.style.opacity=.5;
+  glow.style.opacity=0;glow.style.transform='';
+  impact.style.opacity=0;sparks.innerHTML='';
+  txt.style.transform='';txt.style.removeProperty('--cc');
+  txt.textContent='抛硬币决定先手…';hint.style.opacity=.85;
+  const timers=[];let closed=false;
+  const T=(f,ms)=>timers.push(setTimeout(f,ms));
+  const cleanup=()=>{
+    if(closed)return;closed=true;
+    timers.forEach(clearTimeout);
+    if(window.anime.remove)window.anime.remove([box,wrap,squash,face,shadow,glow,impact,el,txt]);
+    el.classList.remove('on');el.hidden=true;el.style.opacity='';
+    COIN=false;if(G)render();cb&&cb();
+  };
+  const showResult=()=>{
+    txt.style.setProperty('--cc',p.color);
+    txt.innerHTML=`<img class="coinMini" src="${SPR['mp'+first].url}" alt=""><b>${p.name}</b>先手！`;
+    A({targets:txt,scale:[.7,1],duration:560,easing:'easeOutElastic(1,.55)'});
+    hint.style.opacity=.45;
+    sfx('turn');
+  };
+  /* 入场 → 抛起 → 旋转 → 落地 */
+  A({targets:box,scale:[.84,1],opacity:[0,1],duration:340,easing:'easeOutBack'});
+  A({targets:glow,opacity:[0,.85],scale:[.55,1.08],duration:640,easing:'easeOutQuad'});
+  A({targets:wrap,translateY:[0,-154],duration:640,easing:'easeOutQuad'});
+  A({targets:shadow,scaleX:[.85,.5],opacity:[.5,.18],duration:640,easing:'easeOutQuad'});
+  A({targets:face,rotateY:[0,endDeg],duration:1440,easing:'easeOutQuart',update:faceSwap});
   sfx('coin');
-  const face=$('coinFace');
-  A({targets:face,rotateY:[0,1800+(first?180:0)],duration:1500,easing:'easeOutCubic'});
-  A({targets:face,translateY:[{value:-150,duration:650,easing:'easeOutQuad'},{value:0,duration:850,easing:'easeInQuad'}],complete:finish});
+  T(()=>{
+    A({targets:wrap,translateY:[-154,0],duration:800,easing:'easeInQuad'});
+    A({targets:shadow,scaleX:[.5,1],opacity:[.18,.6],duration:800,easing:'easeInQuad'});
+  },640);
+  T(()=>{
+    A({targets:squash,scaleY:[.82,1],scaleX:[1.14,1],duration:520,easing:'easeOutElastic(1,.45)'});
+    A({targets:shadow,scaleX:[1.3,1],opacity:[.85,.5],duration:440,easing:'easeOutQuad'});
+    A({targets:impact,scale:[.35,1.7],opacity:[.95,0],duration:520,easing:'easeOutQuad'});
+    A({targets:glow,scale:[1.08,1.4],opacity:[.85,.28],duration:600,easing:'easeOutQuad'});
+    coinBurst(sparks,18);
+    sfx('clink');buzz(28);
+    showResult();
+  },1440);
+  T(()=>{A({targets:el,opacity:[1,0],duration:260,easing:'easeInQuad'})},2240);
+  T(cleanup,2520);
+  /* 点击跳过 */
+  el.onclick=()=>{
+    if(closed||!COIN)return;
+    timers.forEach(clearTimeout);
+    if(window.anime.remove)window.anime.remove([box,wrap,squash,face,shadow,glow,impact,el]);
+    wrap.style.transform='translateY(0px)';
+    squash.style.transform='';
+    face.style.transform='rotateY('+endDeg+'deg)';syncDeg(endDeg);
+    shadow.style.transform='scaleX(1)';shadow.style.opacity=.5;
+    glow.style.opacity=.3;impact.style.opacity=0;
+    showResult();
+    T(()=>{A({targets:el,opacity:[1,0],duration:200,easing:'easeInQuad'})},420);
+    T(cleanup,640);
+  };
 }
 
 function introFx(){
@@ -1887,7 +2917,8 @@ const SFX={
   nudge:[['square',880,0,.12,.07],['square',880,.2,.12,.07]],
   error:[['sawtooth',160,0,.14,.06,110]],
   token:[['triangle',880,0,.08,.09],['triangle',1175,.09,.14,.09]],
-  coin:[['square',900,0,.03,.05],['square',900,.14,.03,.05],['square',900,.3,.03,.05],['square',900,.5,.03,.05],['square',1319,.9,.3,.08],['square',1760,1,.3,.06]],
+  coin:[['square',900,0,.03,.05],['square',980,.12,.03,.05],['square',1060,.24,.03,.05],['square',1150,.36,.03,.05],['square',1250,.5,.03,.05],['square',1360,.66,.03,.05],['triangle',1500,.9,.4,.04,2300]],
+  clink:[['triangle',1760,0,.05,.05],['square',2637,.01,.08,.035],['triangle',1046,.02,.16,.05]],
   win:[['square',523,0,.14,.07],['square',659,.14,.14,.07],['square',784,.28,.14,.07],['square',1047,.42,.3,.08],['square',784,.8,.12,.06],['square',1047,.92,.5,.08],['triangle',1319,1.1,.6,.07]],
   boom:[['sawtooth',220,0,.25,.06,60]]
 };
@@ -2133,7 +3164,7 @@ function onData(m){
     case 'sync': handleSync(m);return;
     case 'nudge': alertUser('对方在等你操作','nudge');return;
     case 'bye': if(G){G.left=true;stopRecon();showBanner('对方已离开对局。')}return;
-    case 'place': case 'meeple': case 'gold': case 'magic': case 'fplace': case 'fmove': case 'fskip': case 'cchoice': case 'cact': if(G&&G.mode!=='local'&&actorNow()!==G.me) applyAct(m);return;
+    case 'place': case 'meeple': case 'gold': case 'magic': case 'fplace': case 'fmove': case 'fskip': case 'cchoice': case 'cact': case 'flysel': if(G&&G.mode!=='local'&&actorNow()!==G.me) applyAct(m);return;
   }
 }
 function localPlace(x,y,rot){const before=G.acts.length;if(doPlace(x,y,rot))send(G.acts[before])}
@@ -2171,7 +3202,7 @@ const svg=$('board'),world=$('world');
 const V={tx:0,ty:0,k:.9};
 let anim=0,lastPtr='mouse';
 function isCoarse(){return lastPtr==='touch'||(window.matchMedia&&matchMedia('(pointer:coarse)').matches)}
-function applyView(){world.setAttribute('transform',`translate(${V.tx.toFixed(1)} ${V.ty.toFixed(1)}) scale(${V.k.toFixed(4)})`)}
+function applyView(){if(G)placeFab();world.setAttribute('transform',`translate(${V.tx.toFixed(1)} ${V.ty.toFixed(1)}) scale(${V.k.toFixed(4)})`)}
 function animateView(tx,ty,k,instant){
   if(anim) cancelAnimationFrame(anim);
   if(instant||reduceMotion()||!window.requestAnimationFrame){V.tx=tx;V.ty=ty;V.k=k;applyView();return}
@@ -2210,6 +3241,46 @@ function cellAt(px,py){
   const r=svg.getBoundingClientRect();
   return [Math.floor((px-r.left-V.tx)/V.k/100),Math.floor((py-r.top-V.ty)/V.k/100)];
 }
+const MASKC={};
+function fieldMask(key,fi){
+  const k=key+'#'+fi;if(MASKC[k]) return MASKC[k];
+  const A=ANC[key];if(!A||!A.lab) return null;
+  const px=new Uint8Array(PN*PN*4);
+  for(let i=0;i<PN*PN;i++) if(A.lab[i]===fi){const o=i*4;px[o]=255;px[o+1]=255;px[o+2]=255;px[o+3]=255}
+  return MASKC[k]=pngURL(PN,PN,px);
+}
+const MASKD={};
+function fieldMaskId(key,fi){
+  const k=key+'_'+fi,id='mk-'+k;
+  if(MASKD[k]) return id;
+  const url=fieldMask(key,fi);if(!url) return null;
+  $('defs').insertAdjacentHTML('beforeend',`<image id="${id}" width="100" height="100" href="${url}" style="image-rendering:pixelated"/>`);
+  MASKD[k]=1;return id;
+}
+function farmHTML(){
+  if(!PREF.showFarm||!G.cfg.farmers) return '';
+  let h='';const seen=new Set();
+  for(const m of (G.animMeeples||G.meeples)){
+    if(m.b||m.pig||m.ab) continue;
+    const t0=G.board[m.x+','+m.y],f0=t0.feats[m.fi];
+    if(f0.kind!=='field') continue;
+    const c=comp(m.x,m.y,m.fi),key=Array.from(c.nodes).sort()[0];
+    if(seen.has(key)) continue;seen.add(key);
+    const cnt=[0,0];c.meeples.forEach(q=>{if(!q.b&&!q.pig)cnt[q.p]+=q.big?2:1});
+    const mx=Math.max(cnt[0],cnt[1]),win=[0,1].filter(p=>cnt[p]===mx&&mx>0);
+    c.nodes.forEach(n=>{
+      const p=n.split(',').map(Number),t=G.board[p[0]+','+p[1]],ft=t.feats[p[2]],art=T[t.type].art||t.type;
+      const mid2=ft.fidx!=null?fieldMaskId(art,ft.fidx):null;
+      if(!mid2) return;
+      win.forEach(w=>{h+=`<g transform="translate(${p[0]*100} ${p[1]*100}) rotate(${t.rot*90} 50 50)" opacity="${win.length>1?.6:1}"><use href="#${mid2}" filter="url(#tint${w})"/></g>`});
+    });
+    if(c.cities>0){
+      const pig=c.meeples.some(q=>q.pig&&win.includes(q.p)),pts=(pig?4:3)*c.cities,ft=G.board[m.x+','+m.y].feats[m.fi];
+      h+=`<text x="${(m.x*100+ft.ax).toFixed(1)}" y="${(m.y*100+ft.ay-16).toFixed(1)}" text-anchor="middle" font-family="Press Start 2P,monospace" font-size="11" fill="#fff4d6" stroke="#2b1d14" stroke-width="4" paint-order="stroke">+${pts}</text>`;
+    }
+  }
+  return h;
+}
 function renderBoard(){
   let tiles='',mp='';
   const lastXY=G.fx.tile?G.fx.tile[0]+','+G.fx.tile[1]:null;
@@ -2218,11 +3289,11 @@ function renderBoard(){
     tiles+=`<g class="tl"${k===lastXY?' id="lastTile"':''} data-k="${k}">${g}</g>`;
   }
   if(G.last) tiles+=`<rect class="lastT" x="${G.last[0]*100+2}" y="${G.last[1]*100+2}" width="96" height="96"/>`;
-  for(const m of G.meeples){
+  for(const m of (G.animMeeples||G.meeples)){
     const f=G.board[m.x+','+m.y].feats[m.fi];
-    if(m.ab) mp+=`<g${m===G.fx.meeple?' id="lastMeeple"':''} transform="translate(${(m.x*100+f.ax).toFixed(1)} ${(m.y*100+f.ay).toFixed(1)}) scale(1.1)"><g>${useS('ab'+m.p,0,0)}</g></g>`;
-    else if(m.b||m.pig) mp+=`<g${m===G.fx.meeple?' id="lastMeeple"':''} transform="translate(${(m.x*100+f.ax+(m.b?13:-13)).toFixed(1)} ${(m.y*100+f.ay+(m.b?-6:10)).toFixed(1)})"><g>${useS((m.b?'bd':'pg')+m.p,0,0)}</g></g>`;
-    else mp+=meepleG(m.p,m.x*100+f.ax,m.y*100+f.ay,m.big?1.3:.9,f.kind==='field',null,m===G.fx.meeple?'lastMeeple':'');
+    if(m.ab) mp+=`<g${m===G.fx.meeple?' id="lastMeeple"':''} transform="translate(${(m.x*100+f.ax).toFixed(1)} ${(m.y*100+f.ay).toFixed(1)}) scale(1.1)"><g>${useS(spk('a',m.p),0,0)}</g></g>`;
+    else if(m.b||m.pig) mp+=`<g${m===G.fx.meeple?' id="lastMeeple"':''} transform="translate(${(m.x*100+f.ax+(m.b?13:-13)).toFixed(1)} ${(m.y*100+f.ay+(m.b?-6:10)).toFixed(1)})"><g>${useS(spk(m.b?'b':'p',m.p),0,0)}</g></g>`;
+    else mp+=meepleG(m.p,m.x*100+f.ax,m.y*100+f.ay,m.big?1.3:.9,f.kind==='field',null,m===G.fx.meeple?'lastMeeple':'',f.kind);
   }
   for(const k in G.board){
     const t=G.board[k],p=k.split(',').map(Number);
@@ -2238,7 +3309,7 @@ function renderBoard(){
     const ft=G.board[n.x+','+n.y].feats[n.fi];
     mp+=`<g transform="translate(${(n.x*100+ft.ax+(f==='mage'?-12:12)).toFixed(1)} ${(n.y*100+ft.ay-10).toFixed(1)}) scale(1.1)">${useS(f==='mage'?'mg':'wt',0,0)}</g>`;
   });
-  $('gTiles').innerHTML=tiles;$('gMeeples').innerHTML=mp;
+  $('gTiles').innerHTML=tiles;$('gFarm').innerHTML=farmHTML();$('gMeeples').innerHTML=mp;
 }
 function cellRotOf(k){
   const rs=G.legal[k],o=G.cellRot[k];
@@ -2248,24 +3319,33 @@ function cellRotOf(k){
 function renderOverlay(){
   let h='';
   if(G.phase==='place'&&G.cur&&canAct()){
-    for(const k in G.legal){
-      const p=k.split(',').map(Number),r=cellRotOf(k),sel=G.hover===k;
-      h+=`<g class="${sel?'ghostG':''}" opacity="${sel?.96:.42}" pointer-events="none">${tileG(G.cur,r,p[0],p[1])}</g>`;
+    const lk=Object.keys(G.legal);
+    if(!G.hover&&lk.length===1) G.hover=lk[0];
+    for(const k of lk){
+      const p=k.split(',').map(Number),sel=G.hover===k;
+      const r=cellRotOf(k);
+      h+=`<g class="${sel?'ghostG':''}" opacity="${sel?.96:.4}" pointer-events="none">${tileG(G.cur,r,p[0],p[1])}</g>`;
       h+=`<rect class="cell ${sel?'pick':'ok'}" x="${p[0]*100+3}" y="${p[1]*100+3}" width="94" height="94"/>`;
-    }
-    for(const k in G.legal){
-      if(G.legal[k].length<2) continue;
-      const p=k.split(',').map(Number);
-      h+=`<g class="rotb" data-rot="${k}" transform="translate(${p[0]*100+81} ${p[1]*100+19})"><circle class="rotC" r="15"/>${useS('rot',0,0)}</g>`;
+      if(sel&&G.legal[k].length>=2) h+=`<g class="rotb" data-rot="${k}" transform="translate(${p[0]*100+81} ${p[1]*100+19})"><circle class="rotC" r="15"/>${useS('rot',0,0)}</g>`;
     }
   }
+  if(G.phase==='fly'&&canAct()) G.fopts.forEach((o,oi)=>{
+    const f=G.board[o.x+','+o.y].feats[o.fi],u=useS(fk(f.kind,G.turn),0,0);
+    h+=`<g class="anc" data-fl="${oi}" transform="translate(${(o.x*100+f.ax).toFixed(1)} ${(o.y*100+f.ay).toFixed(1)}) scale(.95)"><circle class="ancC" r="15"/>${u}</g>`;
+  });
   if(G.phase==='meeple'&&canAct()&&G.pos){
-    const me=G.players[G.turn],big=G.bigSel&&me.big>0;
-    G.opts.forEach((o,oi)=>{
-      const f=G.board[o.x+','+o.y].feats[o.fi],sel=G.sel===oi,far=o.x!==G.pos[0]||o.y!==G.pos[1];
-      const u=G.fig==='a'?useS('ab'+G.turn,0,0):G.fig==='b'?useS('bd'+G.turn,0,0):G.fig==='p'?useS('pg'+G.turn,0,0):useS('mp'+G.turn,0,0);
-      h+=`<g class="anc${sel?' sel':''}" data-o="${oi}" transform="translate(${(o.x*100+f.ax).toFixed(1)} ${(o.y*100+f.ay).toFixed(1)}) scale(${big?1.25:.9})"><circle class="ancC" r="${far?13:15}"/>`+
-         `<g opacity="${sel?1:.85}">${f.kind==='field'&&!G.fig?`<g transform="rotate(90)">${u}</g>`:u}</g></g>`;
+    const nodes=meepleNodes(),px0=G.pos[0],py0=G.pos[1];
+    G.board[px0+','+py0].feats.forEach((f,i)=>{
+      if(f.nm) return;
+      if(nodes.some(n=>n.x===px0&&n.y===py0&&n.fi===i)) return;
+      if(!comp(px0,py0,i).meeples.length) return;
+      h+=`<g pointer-events="none" transform="translate(${(px0*100+f.ax).toFixed(1)} ${(py0*100+f.ay).toFixed(1)})"><circle r="9" fill="rgba(43,29,20,.62)" stroke="#e0735f" stroke-width="2"/><path d="M-4,-4 L4,4 M4,-4 L-4,4" stroke="#fff4d6" stroke-width="2.5"/></g>`;
+    });
+    nodes.forEach((n,ni)=>{
+      const f=nodeFeat(n),sel=G.chooseN===ni,far=n.x!==px0||n.y!==py0,g0=n.figs[0];
+      const u=useS(g0==='b'||g0==='p'||g0==='a'?spk(g0,G.turn):(g0==='fly'||g0==='flyb')?'fly':fk(f.kind,G.turn),0,0);
+      const lying=f.kind==='field'&&(g0==='m'||g0==='big');
+      h+=`<g class="anc${sel?' sel':''}" data-n="${ni}" transform="translate(${(n.x*100+f.ax).toFixed(1)} ${(n.y*100+f.ay).toFixed(1)}) scale(${g0==='big'?1.25:.9})"><circle class="ancC" r="${far?13:15}"/><g opacity="${sel?1:.88}">${lying?`<g transform="rotate(90)">${u}</g>`:u}</g>${n.figs.length>1?'<circle cx="11" cy="-11" r="5" fill="#b13a2a" stroke="#2b1d14" stroke-width="1.5"/>':''}</g>`;
     });
   }
   if(canAct()){
@@ -2283,7 +3363,7 @@ function renderOverlay(){
       });
     }
     if(G.phase==='cact') G.copts.forEach((o,oi)=>{
-      const f=G.board[o.x+','+o.y].feats[o.fi],u=useS('mp'+G.cropActor,0,0);
+      const f=G.board[o.x+','+o.y].feats[o.fi],u=useS(fk(f.kind,G.cropActor),0,0);
       h+=`<g class="anc" data-o="${oi}" transform="translate(${(o.x*100+f.ax).toFixed(1)} ${(o.y*100+f.ay).toFixed(1)}) scale(.9)"><circle class="ancC" r="15"/>${f.kind==='field'?`<g transform="rotate(90)">${u}</g>`:u}</g>`;
     });
   }
@@ -2305,11 +3385,12 @@ function extras(p,i){
   if(has('goods')) s+=`<span class="tk" title="建筑师">${ic('bd'+i)}${p.bld}</span><span class="tk" title="猪">${ic('pg'+i)}${p.pig}</span>`;
   return s;
 }
+const dscore=i=>G.animScores?G.animScores[i]:G.players[i].score;
 function playersHTML(style){
   return G.players.map((p,i)=>{
     const on=G.turn===i&&!G.over,me=G.mode!=='local'&&G.me===i;
-    if(style==='chip') return `<div class="chip${on?' on':''}" data-p="${i}" style="--pc:${p.color}"><span class="cn">${p.name[0]}${me?'<i>你</i>':''}</span><b class="num">${p.score}</b><span class="cm"><img src="${SPR['mp'+i].url}" alt="">${p.meeples}</span></div>`;
-    return `<div class="pl${on?' on':''}" data-p="${i}" style="--pc:${p.color}"><div class="plTop"><span class="plName">${p.name}${me?'<em>你</em>':''}</span><span class="plScore">${p.score}</span></div><div class="plM">${meepleIcons(p,i)}${extras(p,i)}</div></div>`;
+    if(style==='chip') return `<div class="chip${on?' on':''}" data-p="${i}" style="--pc:${p.color}"><span class="cn">${p.name[0]}${me?'<i>你</i>':''}</span><b class="num">${dscore(i)}</b><span class="cm"><img src="${SPR['mp'+i].url}" alt="">${p.meeples}</span></div>`;
+    return `<div class="pl${on?' on':''}" data-p="${i}" style="--pc:${p.color}"><div class="plTop"><span class="plName">${p.name}${me?'<em>你</em>':''}</span><span class="plScore">${dscore(i)}</span></div><div class="plM">${meepleIcons(p,i)}${extras(p,i)}</div></div>`;
   }).join('');
 }
 function cfgText(c){
@@ -2343,7 +3424,7 @@ function renderPanel(){
   const prev=G.cur?tileG(G.cur,G.hover&&G.legal[G.hover]?cellRotOf(G.hover):G.curRot,0,0):'';
   $$('.js-prev').forEach(el=>{el.innerHTML=prev});
   $$('.js-deck').forEach(el=>{el.innerHTML=deckHTML()});
-  $$('.js-hint').forEach(el=>{el.textContent=hintText()});
+  $$('.js-hint').forEach(el=>{el.textContent=''});
   $$('.js-cfg').forEach(el=>{el.textContent=cfgText(G.cfg)});
   $$('.js-tok').forEach(el=>{el.textContent=tokText();el.hidden=!el.textContent});
   const mine=canAct(),place=G.phase==='place'&&mine,mp=G.phase==='meeple'&&mine,me=G.players[G.turn];
@@ -2363,11 +3444,69 @@ function renderPanel(){
   $$('[data-act="confirm"]').forEach(b=>{b.disabled=!okConfirm;b.textContent=mp?'放置随从':'确认放置'});
   $$('[data-act="nudge"]').forEach(b=>{b.hidden=!(G.mode!=='local'&&!myTurn()&&!G.over)});
   $('log').innerHTML=G.log.slice(0,40).map(l=>`<li>${l}</li>`).join('');
+  promptRender();
   $('stage').style.setProperty('--tc',G.over?'transparent':G.players[G.turn].color);
   panelFx();
 }
 
-function render(){if(!G)return;renderBoard();renderOverlay();renderPanel();playFx()}
+const FIGN={m:'随从',big:'大随从',b:'建筑师',p:'猪',a:'院长',fly:'随从飞行',flyb:'大随从飞行'};
+const ROLEK={city:'kn',road:'tr',mon:'mk',field:'fm'};
+const roleOn=()=>PREF.figStyle==='role';
+function fk(kind,p){return (roleOn()&&ROLEK[kind]?ROLEK[kind]:'mp')+p}
+function spk(t,p){return roleOn()?(t==='b'?'rb':t==='p'?'rp':'ra')+p:(t==='b'?'bd':t==='p'?'pg':'ab')+p}
+function nodeFeat(n){const t=G.board[n.x+','+n.y];return n.fi>=0?t.feats[n.fi]:{ax:t.fly.pos[0],ay:t.fly.pos[1],kind:'fly'}}
+function figSprite(g,turn,kind){return SPR[g==='b'||g==='p'||g==='a'?spk(g,turn):(g==='fly'||g==='flyb')?'fly':fk(kind,turn)]}
+function meepleNodes(){
+  const me=G.players[G.turn],map={},order=[];
+  const add=(o,f)=>{const k=o.x+','+o.y+','+o.fi;if(!map[k]){map[k]={x:o.x,y:o.y,fi:o.fi,figs:[]};order.push(k)}if(!map[k].figs.includes(f))map[k].figs.push(f)};
+  G.allOpts.m.forEach(o=>{if(me.meeples>0)add(o,'m');if(has('inn')&&me.big>0)add(o,'big')});
+  G.allOpts.b.forEach(o=>add(o,'b'));G.allOpts.p.forEach(o=>add(o,'p'));G.allOpts.a.forEach(o=>add(o,'a'));
+  const res=order.map(k=>map[k]);
+  const ft=G.pos&&G.board[G.pos[0]+','+G.pos[1]];
+  if(has('fly')&&ft&&ft.fly){const figs=[];if(me.meeples>0)figs.push('fly');if(has('inn')&&me.big>0)figs.push('flyb');if(figs.length)res.push({x:G.pos[0],y:G.pos[1],fi:-1,figs});}
+  return res;
+}
+function hideChoose(){const c=$('choose');if(c)c.hidden=true}
+function placeFab(){
+  const c=$('choose');if(!c) return;
+  if(!G||G.over||G.phase!=='meeple'||G.chooseN==null||!canAct()||!$('lobby').hidden){c.hidden=true;return}
+  const n=meepleNodes()[G.chooseN];
+  if(!n){c.hidden=true;return}
+  const f=nodeFeat(n);
+  c.innerHTML=n.figs.map(g=>`<button type="button" data-fig="${g}"><img src="${figSprite(g,G.turn,f.kind).url}" alt=""${g==='big'?' style="height:38px"':''}><span>${FIGN[g]}</span></button>`).join('');
+  c.hidden=false;
+  const r=svg.getBoundingClientRect(),st=$('stage').getBoundingClientRect();
+  const cx=r.left-st.left+V.tx+(n.x*100+f.ax)*V.k,cy=r.top-st.top+V.ty+(n.y*100+f.ay)*V.k+22*V.k;
+  const w=c.offsetWidth||120,h=c.offsetHeight||70;
+  let y=cy;if(y+h>st.height-8)y=Math.max(8,cy-h-44*V.k);
+  c.style.left=clamp(cx,w/2+6,Math.max(w/2+6,st.width-w/2-6))+'px';c.style.top=y+'px';
+}
+function promptInfo(){
+  if(!G||G.over||FIN.on) return null;
+  if(G.mode!=='local'&&!netOK()) return {step:'连接',txt:'连接中断，重连后继续'};
+  if(!canAct()) return {step:'等待',txt:`等待${G.players[actorNow()].name}操作…`};
+  const touch=isCoarse();
+  switch(G.phase){
+    case 'place': return {step:'① 放地块',txt:touch?'点一个发光位置预览，再点一次确认；↻ 旋转':'点击发光位置放置；R / 右键 / ↻ 旋转'};
+    case 'gold': return {step:'金矿',txt:'点击相邻（含斜角）的地块，放第 2 个金锭'};
+    case 'magic': return {step:'魔法',txt:G.mfig?'点击一个未完成的城市或道路':'先选择法师或女巫'};
+    case 'meeple': return {step:'② 放随从',txt:'点圆圈放随从（有多种棋子时会让你选）；不放请点右侧按钮或按空格'};
+    case 'fplace': return {step:'渡口',txt:'依次点两条道路的端点，把它们连起来'};
+    case 'fmove': return {step:'渡口',txt:G.fsel?'依次点两条道路端点来移动渡口':'点发光的湖泊地块来移动渡口，或选择不移动'};
+    case 'fly': return {step:'飞行器',txt:`骰到 ${G.flyRoll}：点一个要降落的要素`};
+    case 'cchoice': return {step:'怪圈',txt:'选择 A 增加随从或 B 撤回随从（双方都要执行）'};
+    case 'cact': return {step:'怪圈',txt:G.cchoice==='A'?'点一个同类随从所在的要素，增加一个':'点一个要撤回的同类随从'};
+  }
+  return null;
+}
+function promptRender(){
+  const p=$('prompt');if(!p) return;
+  const info=promptInfo();
+  if(!info||!$('lobby').hidden){p.hidden=true;hideChoose();return}
+  p.hidden=false;$('pStep').textContent=info.step;$('pTxt').textContent=info.txt;
+  placeFab();
+}
+function render(){if(!G)return;syncFarmBtn();renderBoard();renderOverlay();renderPanel();playFx()}
 /* ---------- 输入：拖拽、缩放、点击 ---------- */
 const pts=new Map();let drag=null,pinch=null;
 const dist=(a,b)=>Math.hypot(a[0]-b[0],a[1]-b[1]);
@@ -2402,6 +3541,12 @@ window.addEventListener('pointerup',e=>{
 });
 window.addEventListener('pointercancel',e=>{pts.delete(e.pointerId);if(pts.size<2)pinch=null;if(!pts.size)drag=null});
 svg.addEventListener('pointerleave',e=>{if(e.pointerType==='mouse'&&G&&G.hover){G.hover=null;renderOverlay();renderPanel()}});
+svg.addEventListener('contextmenu',e=>{
+  e.preventDefault();
+  if(!G||G.phase!=='place'||!canAct()) return;
+  const c=cellAt(e.clientX,e.clientY),k=c[0]+','+c[1];
+  if(G.legal[k]) cycleCell(k);else rotateCur();
+});
 svg.addEventListener('wheel',e=>{
   e.preventDefault();
   const r=svg.getBoundingClientRect();
@@ -2415,12 +3560,13 @@ function updateHover(e){
 function handleTap(e,tgt){
   if(!G||G.over||COIN) return;
   if(G.mode!=='local'&&myTurn()&&!netOK()){toast('连接中断，重连后可继续');return}
+  const an=tgt&&tgt.closest?tgt.closest('[data-n]'):null;
+  if(an){if(G.phase==='meeple'&&canAct())anchorTap(+an.getAttribute('data-n'),e.pointerType);return}
+  const fl=tgt&&tgt.closest?tgt.closest('[data-fl]'):null;
+  if(fl){if(G.phase==='fly'&&canAct())localAct({t:'flysel',i:+fl.getAttribute('data-fl')});return}
   const a=tgt&&tgt.closest?tgt.closest('[data-o]'):null;
-  if(a){
-    if(G.phase==='cact'&&canAct()) localAct({t:'cact',i:+a.getAttribute('data-o')});
-    else if(G.phase==='meeple'&&canAct()) anchorTap(+a.getAttribute('data-o'),e.pointerType);
-    return;
-  }
+  if(a){if(G.phase==='cact'&&canAct())localAct({t:'cact',i:+a.getAttribute('data-o')});return}
+  if(G.chooseN!=null){G.chooseN=null;hideChoose();renderOverlay()}
   const fs=tgt&&tgt.closest?tgt.closest('[data-fs]'):null;
   if(fs){if(canAct())fsTap(+fs.getAttribute('data-fs'));return}
   const mgt=tgt&&tgt.closest?tgt.closest('[data-mg]'):null;
@@ -2445,9 +3591,15 @@ function handleTap(e,tgt){
   cellTap(c[0],c[1],e.pointerType);
 }
 function useBig(){const me=G.players[G.turn];return (G.bigSel&&me.big>0)||(me.meeples<1&&me.big>0)}
-function anchorTap(oi,ptype){
-  if(ptype==='touch'&&G.sel!==oi){G.sel=oi;buzz([12]);sfx('select');renderOverlay();renderPanel();return}
-  localMeeple(G.opts[oi],useBig()&&!G.fig,G.fig);
+function placeFig(n,f){
+  G.chooseN=null;hideChoose();
+  if(f==='fly'||f==='flyb'){localMeeple(null,f==='flyb','fly');return}
+  localMeeple({x:n.x,y:n.y,fi:n.fi},f==='big',(f==='b'||f==='p'||f==='a')?f:undefined);
+}
+function anchorTap(ni,ptype){
+  const n=meepleNodes()[ni];if(!n) return;
+  if(n.figs.length===1&&ptype!=='touch'){placeFig(n,n.figs[0]);return}
+  G.chooseN=ni;buzz([12]);sfx('select');renderOverlay();placeFab();
 }
 function fsTap(side){
   if(G.phase!=='fplace'&&G.phase!=='fmove') return;
@@ -2479,7 +3631,13 @@ function rotateCur(){
 
 window.addEventListener('keydown',e=>{
   if(e.target&&(e.target.tagName==='INPUT'||e.target.tagName==='SELECT')) return;
+  if(e.key==='Escape'&&G&&G.chooseN!=null){G.chooseN=null;hideChoose();renderOverlay();return}
   if(e.key==='r'||e.key==='R') rotateCur();
+  else if(e.key==='f'||e.key==='F'){if(G&&$('lobby').hidden)act('farm')}
+  else if(G&&canAct()&&(e.key===' '||e.key==='Enter'||e.key==='Escape')){
+    if(G.phase==='meeple'){e.preventDefault();localMeeple(null,false)}
+    else if(G.phase==='fmove'){e.preventDefault();localAct({t:'fskip'})}
+  }else if(G&&canAct()&&G.phase==='cchoice'&&(e.key==='a'||e.key==='A'||e.key==='b'||e.key==='B'))localAct({t:'cchoice',c:e.key.toUpperCase()});
 });
 
 /* ---------- 按钮（事件委托） ---------- */
@@ -2493,6 +3651,9 @@ function act(a){
     case 'cA': case 'cB': if(G&&G.phase==='cchoice'&&canAct())localAct({t:'cchoice',c:a==='cA'?'A':'B'});break;
     case 'fskip': if(G&&G.phase==='fmove'&&canAct())localAct({t:'fskip'});break;
     case 'rab': if(G&&G.phase==='meeple'&&canAct())localMeeple(null,false,'ret');break;
+    case 'farm': PREF.showFarm=!PREF.showFarm;LS.set('kks-pref',PREF);if(G)render();syncFarmBtn();break;
+    case 'finalSkip': skipFinal();break;
+    case 'finalFast': FIN.fast=!FIN.fast;syncFinalBtn();break;
     case 'fit': fitView(true);break;
     case 'nudge': nudge();break;
     case 'cog': openCog();break;
@@ -2520,6 +3681,7 @@ function switchToLocal(){
 const TN={A:'修道院·带路',B:'修道院',C:'满城(盾)',D:'城冠·横路',E:'城冠',F:'横城带(盾)',G:'竖城带',H:'对向双城',I:'邻角双城',J:'城冠·右弯路',K:'城冠·左弯路',L:'城冠·三岔路',M:'角城(盾)',N:'角城',O:'角城·弯路(盾)',P:'角城·弯路',Q:'三面城(盾)',R:'三面城',S:'三面城·路(盾)',T:'三面城·路',U:'直路',V:'弯路',W:'三岔路口',X:'十字路口',
   gE:'城冠·花园',gH:'对向双城·花园',gI:'邻角双城·花园',gM:'角城·花园(盾)',gN:'角城·花园',gR:'三面城·花园',gU:'直路·花园',gV:'弯路·花园',
   Ia:'客栈·弯路',Ib:'客栈·直路·花园',Ic:'客栈·三岔路',Id:'修道院·断路',Ie:'双弯路',If:'角城·路',Ig:'角城',Ih:'四城·花园',Ii:'双城·断路',Ij:'城·路',Ka:'大教堂',Kb:'大教堂',Il:'客栈·角城弯路(盾)',Im:'客栈·城冠弯路',In:'客栈·角城路',Io:'三城',Ip:'三面城(盾)',Iq:'三面城·路(盾)',
+  Rv1:'河源·桥',Rv2:'河·城门桥',Rv3:'河·双城',Rv4:'直河·小岛',Rv5:'河·城',Rv6:'河湾(S形)',Rv7:'河湾',Rv8:'河·修道院·桥',Rv9:'河湾·弯路',Rv10:'河湾·花园',Rv11:'河·桥·村',Rv12:'湖泊·修道院',
   Fa:'渡口·城冠',Fb:'渡口·城冠',Fc:'渡口·城冠',Fd:'渡口·三路',Fe:'渡口·四路',Ff:'渡口·四路',Fg:'渡口·四路',Fh:'渡口·四路',
   Ga:'金矿·双弯路',Gb:'金矿·角城弯路',Gc:'金矿·角城·修道院',Gd:'金矿·路穿城',Ge:'金矿·修道院·双弯路',Gf:'金矿·桥梁',Gg:'金矿·角城·修道院',Gh:'金矿·修道院·弯路',
   Ma:'魔法·三岔城冠',Mb:'魔法·三面城·路',Mc:'魔法·三面城·路',Md:'魔法·对向双城',Me:'魔法·角城弯路·花园',Mf:'魔法·角城弯路',Mg:'魔法·城带·双路',Mh:'魔法·城冠·双路',
@@ -2527,6 +3689,7 @@ const TN={A:'修道院·带路',B:'修道院',C:'满城(盾)',D:'城冠·横路'
   HA:'城冠·路',HB:'桥梁',HC:'桥·农舍·城门',HD:'玉米·角城+底城',HE:'玉米·城带·路',HF:'玉米·角城·路',HG:'玉米·角城',HH:'玉米·三面城',HI:'玉米·三面城·路',HJ:'修道院·三路',HK:'布匹·角城·路·花园',HL:'布匹·角城+底城',HM:'布匹·三城',HN:'布匹·城带+底城',HO:'布匹·角城·双路',HP:'葡萄酒·城带+底城',HQ:'葡萄酒·城带',HR:'葡萄酒·城带·双路',HS:'葡萄酒·城带·路',HT:'葡萄酒·角城',HU:'葡萄酒·角城·双路·花园',HV:'葡萄酒·三面城·路',HW:'葡萄酒·角城·路',HX:'葡萄酒·双角城'};
 function openCatalog(exps){
   exps=exps||(G?G.cfg.exps:readCfg().exps);
+  addTileDefs(exps);
   const placed={},rem={};
   if(G){
     for(const k in G.board){const t=G.board[k].type;placed[t]=(placed[t]||0)+1}
@@ -2593,10 +3756,80 @@ function showModal(title,note,again){
   $('endModal').hidden=false;
   A({targets:'#endCard',scale:[.8,1],opacity:[0,1],duration:380,easing:'easeOutBack'});
 }
+const FIN={on:false,skip:false,fast:false,timer:0};
+function focusKeys(keys){
+  const r=svg.getBoundingClientRect();if(!r.width) return;
+  let x0=1e9,x1=-1e9,y0=1e9,y1=-1e9;
+  keys.forEach(k=>{const p=k.split(',').map(Number);x0=Math.min(x0,p[0]);x1=Math.max(x1,p[0]);y0=Math.min(y0,p[1]);y1=Math.max(y1,p[1])});
+  const w=(x1-x0+3)*100,h=(y1-y0+3)*100,k=clamp(Math.min(r.width/w,r.height/h),.5,1.5);
+  animateView(r.width/2-(x0+x1+1)/2*100*k,r.height/2-(y0+y1+1)/2*100*k,k,false);
+}
+function syncFarmBtn(){const b=$('farmBtn');if(b){b.classList.toggle('on',!!PREF.showFarm);b.hidden=!(G&&G.cfg&&G.cfg.farmers)||!$('lobby').hidden}}
+function syncFinalBtn(){$$('[data-act="finalFast"]').forEach(b=>b.classList.toggle('on',FIN.fast))}
+function startFinalShow(){
+  const steps=G.finalSteps||[];
+  if(!steps.length||!window.anime||reduceMotion()||REPLAY){showEnd();return}
+  FIN.on=true;FIN.skip=false;
+  G.animScores=G.preFinal.slice();G.animMeeples=G.finalMeeples.map(m=>Object.assign({},m));
+  svg.classList.add('finalMode');$('finalBar').hidden=false;
+  hideChoose();render();
+  FIN.timer=setTimeout(()=>runFinal(steps,0,new Set()),900);
+}
+const mid=m=>[m.p,m.x,m.y,m.fi,m.b?1:0,m.pig?1:0,m.ab?1:0].join('|');
+function runFinal(steps,i,scored){
+  if(FIN.skip||i>=steps.length){endFinal();return}
+  const st=steps[i];
+  G.animMeeples=G.finalMeeples.filter(m=>!scored.has(mid(m)));
+  $('fbCount').textContent=`${i+1} / ${steps.length}`;
+  $('fbBar').style.width=((i+1)/steps.length*100)+'%';
+  $('fbText').textContent=st.text;
+  $('fbSeal').style.background=st.win&&st.win.length?G.players[st.win[0]].color:'#e8c14a';
+  G.animScores=st.scores.slice();
+  renderBoard();renderPanel();
+  drawFinalStep(st);
+  sfx(st.kind==='bonus'?'token':'score');
+  const dur=(steps.length>14?1050:1500)/(FIN.fast?2:1);
+  FIN.timer=setTimeout(()=>{st.meeples.forEach(m=>scored.add(mid(m)));runFinal(steps,i+1,scored)},dur);
+}
+function drawFinalStep(st){
+  const g=$('gFinal');let h='';
+  const col=st.win&&st.win.length?G.players[st.win[0]].color:'#e8c14a';
+  if(st.tiles.length){
+    st.tiles.forEach(k=>{
+      const p=k.split(',').map(Number),t=G.board[k];if(!t) return;
+      h+=`<g class="finT">${tileG(t.type,t.rot,p[0],p[1],t)}<rect x="${p[0]*100+3}" y="${p[1]*100+3}" width="94" height="94" fill="${col}" fill-opacity=".14" stroke="${col}" stroke-width="5"/></g>`;
+    });
+    st.meeples.forEach(m=>{
+      const f=G.board[m.x+','+m.y].feats[m.fi],key=m.ab?spk('a',m.p):m.b?spk('b',m.p):m.pig?spk('p',m.p):fk(f.kind,m.p);
+      const lying=f.kind==='field'&&!m.b&&!m.pig&&!m.ab,u=useS(key,0,0);
+      h+=`<g class="finM" transform="translate(${(m.x*100+f.ax+(m.b?13:m.pig?-13:0)).toFixed(1)} ${(m.y*100+f.ay).toFixed(1)}) scale(${m.big?1.6:1.25})">${lying?`<g transform="rotate(90)">${u}</g>`:u}</g>`;
+    });
+    let sx=0,sy=0;st.tiles.forEach(k=>{const p=k.split(',').map(Number);sx+=p[0];sy+=p[1]});
+    const cx=sx/st.tiles.length*100+50,cy=sy/st.tiles.length*100+30;
+    st.win.forEach((p,i)=>{h+=`<text class="finP" x="${cx}" y="${cy+i*26}" text-anchor="middle" font-family="Press Start 2P,monospace" font-size="24" fill="${G.players[p].color}" stroke="#2b1d14" stroke-width="7" paint-order="stroke">+${st.gain[i]}</text>`});
+  }
+  g.innerHTML=h;
+  if(st.tiles.length) focusKeys(st.tiles);
+  A({targets:'#gFinal .finT rect',opacity:[.2,1,.7],duration:800,easing:'easeInOutSine'});
+  A({targets:'#gFinal .finM',translateY:[-26,0],opacity:[0,1],duration:560,easing:'easeOutBack'});
+  A({targets:'#gFinal .finP',translateY:[10,-18],opacity:[0,1,1],duration:900,easing:'easeOutQuad'});
+}
+function skipFinal(){FIN.skip=true;clearTimeout(FIN.timer);endFinal()}
+function endFinal(){
+  if(!FIN.on) return;
+  FIN.on=false;clearTimeout(FIN.timer);
+  G.animScores=null;G.animMeeples=null;$('gFinal').innerHTML='';
+  svg.classList.remove('finalMode');$('finalBar').hidden=true;
+  fitView(true);render();showEnd();
+}
 function showEnd(){
   const a=G.players[0],b=G.players[1],win=a.score===b.score?-1:(a.score>b.score?0:1);
   showModal(win<0?'平局':G.players[win].name+'获胜','',true);
-  $('endScores').innerHTML=G.players.map((p,i)=>`<div class="endRow" style="--pc:${p.color}"><span>${win===i?`<img class="pxi crownBig" src="${SPR.crown.url}" alt="">`:''}${p.name}</span><b class="num" data-v="${p.score}">${p.score}</b></div>`).join('');
+  const SRC=[['city','城市'],['road','道路'],['mon','修道院'],['field','农田'],['other','其他']];
+  $('endScores').innerHTML=G.players.map((p,i)=>{
+    const st=(G.stats&&G.stats[i])||{},line=SRC.filter(q=>st[q[0]]).map(q=>`${q[1]} ${st[q[0]]}`).join('　');
+    return `<div class="endRow" style="--pc:${p.color}"><span class="endWho">${win===i?`<img class="pxi crownBig" src="${SPR.crown.url}" alt="">`:''}${p.name}<small>${line||'本局没有得分'}</small></span><b class="num" data-v="${p.score}">${p.score}</b></div>`;
+  }).join('');
   const guest=G.mode==='guest';
   $('btnAgain').disabled=guest;$('btnAgain').textContent=guest?'等待房主开始新局':'再来一局';
   sfx('win');celebrate(win);
@@ -2613,6 +3846,7 @@ function goHome(){
   setTimeout(()=>{destroyPeer();location.hash='';location.reload()},60);
 }
 function openCog(){
+  $('prefFig').value=PREF.figStyle;$('prefFarm').checked=!!PREF.showFarm;
   $('prefSound').checked=PREF.sound;$('prefVib').checked=PREF.vib;$('prefAnim').checked=PREF.anim!==false;
   const ex=G?EXPS.filter(e=>G.cfg.exps.indexOf(e.id)>=0):[];
   $('expRules').innerHTML=ex.length?ex.map(e=>`<h3>${e.name}</h3><ul class="rules" style="margin-top:2px">${e.rules.map(r=>`<li>${r}</li>`).join('')}</ul>`).join(''):'';
@@ -2698,13 +3932,26 @@ $('btnCopy').onclick=()=>{
   if(navigator.clipboard&&navigator.clipboard.writeText) navigator.clipboard.writeText(url).then(done,()=>prompt('复制这个链接发给对方：',url));
   else prompt('复制这个链接发给对方：',url);
 };
+$('btnArtImport').onclick=()=>$('artFile').click();
+$('artFile').onchange=e=>{importArt(Array.from(e.target.files));e.target.value=''};
+$('btnArtClear').onclick=()=>{if(confirm('清除所有已导入的自定义地块图？'))clearArt()};
+loadArtDB();
+$('choose').addEventListener('click',e=>{
+  const b=e.target.closest('button[data-fig]');
+  if(!b||!G||G.phase!=='meeple'||!canAct()) return;
+  const n=meepleNodes()[G.chooseN];if(n)placeFig(n,b.getAttribute('data-fig'));
+});
 $('btnAgain').onclick=rematch;
 $('btnResume').onclick=resumeSession;
 $('btnDrop').onclick=()=>{LS.del(SKEY);$('resumeBox').hidden=true};
 $('prefSound').onchange=e=>{PREF.sound=e.target.checked;LS.set('kks-pref',PREF);unlockAudio();beep('turn')};
 $('prefVib').onchange=e=>{PREF.vib=e.target.checked;LS.set('kks-pref',PREF);buzz([60])};
+$('prefFig').onchange=e=>{PREF.figStyle=e.target.value;LS.set('kks-pref',PREF);$('prefFig2').value=PREF.figStyle;if(G)render()};
+$('prefFarm').onchange=e=>{PREF.showFarm=e.target.checked;LS.set('kks-pref',PREF);if(G)render();syncFarmBtn()};
+$('prefFig2').onchange=e=>{PREF.figStyle=e.target.value;LS.set('kks-pref',PREF)};
+$('prefFig2').value=PREF.figStyle;
 $('prefAnim').onchange=e=>{PREF.anim=e.target.checked;LS.set('kks-pref',PREF)};
-window.addEventListener('resize',()=>{if(G&&$('lobby').hidden)fitView(false)});
+window.addEventListener('resize',()=>{if(G&&$('lobby').hidden){fitView(false);placeFab()}});
 setInterval(tick,250);
 (function(){
   const m=location.hash.match(/^#([A-Za-z0-9]{5})$/);
