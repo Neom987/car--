@@ -216,6 +216,11 @@ button:disabled{opacity:.4;cursor:default}
 #choose button{display:flex;flex-direction:column;align-items:center;gap:2px;min-width:58px;padding:4px 8px;background:var(--parch2);border:3px solid var(--ink);color:var(--ink);font-size:12px}
 #choose button:hover{background:var(--gold)}
 #choose img{height:30px;width:auto;image-rendering:pixelated}
+#bzPick{position:absolute;left:50%;bottom:104px;transform:translateX(-50%);z-index:9;display:flex;flex-wrap:wrap;justify-content:center;gap:8px;padding:8px;max-width:calc(100% - 24px);background:rgba(42,26,16,.94);border:3px solid var(--ink);box-shadow:0 12px 32px rgba(0,0,0,.45)}
+#bzPick button{display:flex;flex-direction:column;align-items:center;gap:2px;width:96px;padding:4px;background:var(--parch2);border:3px solid var(--ink);color:var(--ink);font-size:12px;cursor:pointer}
+#bzPick button:hover:enabled{background:var(--gold)}
+#bzPick button:disabled{opacity:.45;cursor:default}
+#bzPick svg{display:block;width:76px;height:76px;pointer-events:none}
 .hint{display:none}
 .js-deck{display:flex;align-items:center;gap:8px}
 .stackI{height:26px}
@@ -426,6 +431,7 @@ body.winter .pxbox{filter:drop-shadow(0 0 7px rgba(146,196,232,.26))}
       <button class="btn sm" type="button" data-act="mage" hidden>法师</button><button class="btn sm" type="button" data-act="witch" hidden>女巫</button>
       <button class="btn sm" type="button" data-act="cA" hidden>A 增加随从</button><button class="btn sm" type="button" data-act="cB" hidden>B 撤回随从</button>
       <button class="btn sm" type="button" data-act="fskip" hidden>不移动渡口</button>
+      <button class="primary sm" type="button" data-act="casBuild" hidden>改建成城堡</button><button class="btn sm" type="button" data-act="casSkip" hidden>正常计分</button>
       <button class="btn sm" type="button" data-act="bskip" hidden>不架设桥梁</button></span></div>
     <svg id="board" xmlns="http://www.w3.org/2000/svg" role="img" aria-label="游戏棋盘">
       <defs id="defs"></defs>
@@ -442,6 +448,7 @@ body.winter .pxbox{filter:drop-shadow(0 0 7px rgba(146,196,232,.26))}
     <div id="finalBar" class="pxbox" hidden><span id="fbSeal" class="fbSeal">终局结算</span><span id="fbText"></span><span id="fbCount" class="num"></span><span class="fbBtns"><button class="ghost sm" type="button" data-act="finalFast">加速</button><button class="ghost sm" type="button" data-act="finalSkip">跳过</button></span><i class="fbTrack"><b id="fbBar"></b></i></div>
     <div id="toast" role="status" aria-live="polite"><div id="toastIn" class="pxbox"></div></div>
     <div id="choose" hidden></div>
+    <div id="bzPick" hidden></div>
     <div id="dock">
       <svg class="prev js-prev" viewBox="-6 -6 112 112" aria-label="当前地块"></svg>
       <div class="dockMain">
@@ -2470,12 +2477,12 @@ function freshState(seed,mode,me,cfg){
   return {seed,mode,me,cfg,deck,first,total:deck.length,cellRot:{},board:{'0,0':makeTile(riv?'Rv1':'D',0,-1,cfg.farmers)},river:riv?{open:[0,1,2],last:null}:null,
     players:[0,1].map(i=>({name:PNAME[i],color:PCOL[i],score:0,meeples:7,big,gold:0,ab:cfg.exps.indexOf('abbot')>=0?1:0,bld:cfg.exps.indexOf('goods')>=0?1:0,pig:cfg.exps.indexOf('goods')>=0?1:0,phantom:cfg.exps.indexOf('phantom')>=0?1:0,br:cfg.exps.indexOf('bcb')>=0?3:0,cas:cfg.exps.indexOf('bcb')>=0?3:0,goods:{wine:0,grain:0,cloth:0}})),
     fopts:[],flyBig:false,flyRoll:0,stats:[{},{}],st:[blankSt(),blankSt()],doneFeat:{},doneAll:{city:0,road:0,mon:0},allOpts:{m:[],b:[],p:[],a:[]},magic:{mage:null,witch:null},ingot:{},ferries:8,pre:[],post:[],fused:[],ftiles:[],fcand:[],fsel:null,fa:null,mfig:null,gopts:[],copts:[],cchoice:null,cropT:null,cropActor:null,cq:[],msgs:[],fig:null,second:false,dbl:false,
-    fruit:cfg.exps.indexOf('fruit')>=0?{}:{},fruitBag,castles:[],castleSkip:[],festOpts:null,phOpts:null,brTile:null,brA:null,brCands:[],brDone:false,castleCand:null,bz:null,bzMode:false,bzDone:false,
+    fruit:cfg.exps.indexOf('fruit')>=0?{}:{},fruitBag,castles:[],castleSkip:[],festOpts:null,phOpts:null,brTile:null,brA:null,brCands:[],brDone:false,castleCand:null,casDone:false,bz:null,bzMode:false,bzDone:false,
     meeples:[],turn:first,cur:null,curRot:0,phase:'place',legal:{},hover:null,sel:null,bigSel:false,pos:null,opts:[],last:[0,0],
-    log:[],toasts:[],acts:[],t0:Date.now(),warned:false,nextRemind:0,fx:{tile:null,meeple:null,bridge:null,scores:[],flash:[],waves:[],freed:[],lootPending:[]}};
+    log:[],toasts:[],acts:[],t0:Date.now(),warned:false,nextRemind:0,fx:{tile:null,meeple:null,bridge:null,castle:null,scores:[],flash:[],waves:[],freed:[],lootPending:[]}};
 }
 function addLog(m){G.log.unshift(m);if(G.log.length>80)G.log.pop()}
-function actorNow(){return G.phase==='cact'?G.cropActor:G.turn}
+function actorNow(){if(G.phase==='cact')return G.cropActor;if(G.phase==='bzpick'&&G.bz)return G.bz.order[Math.min(G.bz.idx,G.bz.order.length-1)];return G.turn}
 function myTurn(){return !!G&&(G.mode==='local'||actorNow()===G.me)}
 function canAct(){return myTurn()&&netOK()&&!G.over&&!COIN}
 
@@ -2517,7 +2524,7 @@ function legalMap(type){
 }
 function startTurn(){
   G.pos=null;G.opts=[];G.allOpts={m:[],b:[],p:[],a:[]};G.fig=null;G.fopts=[];G.chooseN=null;G.pre=[];G.post=[];G.fused=[];G.ftiles=[];G.fcand=[];G.fsel=null;G.fa=null;G.mfig=null;G.hover=null;G.sel=null;G.bigSel=false;G.curRot=0;G.cellRot={};
-  G.brDone=false;G.brTile=null;G.brA=null;G.brCands=[];G.festOpts=null;G.phOpts=null;G.castleCand=null;G.bzDone=false;G.bzMode=false;
+  G.brDone=false;G.brTile=null;G.brA=null;G.brCands=[];G.festOpts=null;G.phOpts=null;G.castleCand=null;G.casDone=false;G.bzDone=false;G.bzMode=false;G.bz=null;
   G.t0=Date.now();G.warned=false;G.nextRemind=0;
   for(;;){
     if(!G.deck.length){endGame();return}
@@ -2584,7 +2591,7 @@ function comp(x,y,fi){
       }
     }
   }
-  const ms=G.meeples.filter(m=>seen.has(key(m.x,m.y,m.fi)));
+  const ms=G.meeples.filter(m=>!m.cs&&seen.has(key(m.x,m.y,m.fi)));
   const out={kind,tiles:tiles.size,shields,open,complete:false,meeples:ms,nodes:seen,x,y,cities:0,inn,cath,goods,tileSet:tiles};
   if(kind==='mon') out.complete=monNeighbors(x,y)===8;
   else if(kind==='field'){
@@ -2722,10 +2729,12 @@ function scoreAfter(x,y){
     if(!c.complete) continue;
     const fk0=Array.from(c.nodes).sort()[0];
     if(!G.doneFeat[fk0]){G.doneFeat[fk0]=1;if(c.kind!=='field')G.doneAll[c.kind]=(G.doneAll[c.kind]||0)+1}
+    if(c.kind==='city'&&G.castleSkip.indexOf(fk0)>=0) continue;
     if(c.kind==='city'){
       if(has('goods')&&c.goods.length) giveGoods(c);
     }
     award(c,false);
+    fireCastles(c);
   }
 }
 function countComplete(kind){
@@ -3003,13 +3012,16 @@ function finishTurn(opt,big,fig,noExtra){
     addLog(fig==='b'?`${pl.name}放置建筑师`:fig==='p'?`${pl.name}放置猪`:fig==='a'?`${pl.name}放置院长`:`${pl.name}放置${big?'大':''}${k==='field'?'农夫（田野）':'随从（'+KN[k]+'）'}`);
   }
   G.post=[];
-  if(has('phantom')&&!noExtra&&phantomOpts().length) G.post.push('phantom');
-  if(has('ferry')){
-    const t0=G.board[x+','+y];
-    if(opt&&opt.x===x&&opt.y===y&&!fig&&t0.lake&&!t0.ferry&&G.ferries>0&&t0.feats[opt.fi].kind==='road') G.post.push('fplace');
-    G.post.push('fmove');
+  if(!G.bzMode){
+    if(has('phantom')&&!noExtra&&phantomOpts().length) G.post.push('phantom');
+    if(has('ferry')){
+      const t0=G.board[x+','+y];
+      if(opt&&opt.x===x&&opt.y===y&&!fig&&t0.lake&&!t0.ferry&&G.ferries>0&&t0.feats[opt.fi].kind==='road') G.post.push('fplace');
+      G.post.push('fmove');
+    }
+    if(has('bcb')&&!G.casDone&&pl.cas>0) G.post.push('castle');
+    if(has('bcb')&&!G.brDone&&pl.br>0) G.post.push('bridge');
   }
-  if(has('bcb')&&!G.brDone&&pl.br>0) G.post.push('bridge');
   nextPost();
 }
 function roadSides(k){return G.board[k].feats.filter(f=>f.kind==='road'&&f.sides.length===1).map(f=>f.sides[0])}
@@ -3096,6 +3108,154 @@ function doBridge(a){
   if(!REPLAY){saveSession();render()}
   return true;
 }
+function castleCands(){
+  if(!has('bcb')||!G.pos||G.casDone) return [];
+  const pl=G.players[G.turn];if(pl.cas<1||(pl.meeples<1&&pl.big<1)) return [];
+  const [x,y]=G.pos,t=G.board[x+','+y],out=[];
+  t.feats.forEach((f,i)=>{
+    if(f.kind!=='city') return;
+    const c=comp(x,y,i);
+    if(!c.complete||c.tiles!==2) return;
+    const key=Array.from(c.nodes).sort()[0];
+    if(G.castleSkip.indexOf(key)>=0) return;
+    if(!c.meeples.some(m=>m.p===G.turn)) return;
+    out.push({x,y,fi:i,key});
+  });
+  return out;
+}
+function doCastle(a){
+  if(!G) return false;
+  if(a.t==='cskip'){
+    if(G.phase!=='castle') return false;
+    G.acts.push({t:'cskip'});G.casDone=true;G.castleCand=null;
+    addLog(`${G.players[G.turn].name}决定正常计分`);
+    nextPost();
+    if(!REPLAY){saveSession();render()}
+    return true;
+  }
+  if(G.phase!=='castle'||!G.castleCand) return false;
+  const cc=G.castleCand;
+  if(!castleCands().some(q=>q.key===cc.key)) return false;
+  G.acts.push({t:'castle'});
+  const c=comp(cc.x,cc.y,cc.fi);
+  c.meeples.forEach(m=>{const pl=G.players[m.p];if(m.pm)pl.phantom++;else if(m.b)pl.bld++;else if(m.ab)pl.ab++;else if(m.pig)pl.pig++;else if(m.big)pl.big++;else pl.meeples++});
+  G.meeples=G.meeples.filter(m=>c.meeples.indexOf(m)<0);
+  const pl=G.players[G.turn];
+  let guardBig=0;
+  if(pl.meeples>0)pl.meeples--;else{pl.big--;guardBig=1}
+  pl.cas--;
+  const guard={p:G.turn,x:cc.x,y:cc.y,fi:cc.fi,cs:1};if(guardBig)guard.big=1;
+  G.meeples.push(guard);
+  G.castles.push({p:G.turn,tiles:Array.from(c.tileSet),x:cc.x,y:cc.y,fi:cc.fi,guard});
+  G.castleSkip.push(cc.key);
+  const msg=`${pl.name}把城市改建成城堡`;
+  addLog(msg);G.toasts.push(msg);
+  G.casDone=true;G.castleCand=null;
+  if(!REPLAY){G.fx.castle=[cc.x,cc.y,cc.fi];sfx('token')}
+  nextPost();
+  if(!REPLAY){saveSession();render()}
+  return true;
+}
+function fireCastles(c){
+  if(!has('bcb')||!G.castles.length) return;
+  if(c.kind!=='city'&&c.kind!=='road'&&c.kind!=='mon') return;
+  for(const ca of G.castles.slice()){
+    let near=false;
+    for(const a of ca.tiles){
+      const p=a.split(',').map(Number);
+      for(const b of c.tileSet){
+        const q=b.split(',').map(Number);
+        if(Math.max(Math.abs(p[0]-q[0]),Math.abs(p[1]-q[1]))<=1){near=true;break}
+      }
+      if(near) break;
+    }
+    if(!near) continue;
+    const pts=pointsOf(c);
+    if(pts<=0) continue;
+    const pl=G.players[ca.p];
+    pl.score+=pts;
+    G.st[ca.p].castlePts+=pts;G.st[ca.p].castle++;
+    G.stats[ca.p].other=(G.stats[ca.p].other||0)+pts;
+    G.stats[ca.p].castle=(G.stats[ca.p].castle||0)+pts;
+    G.meeples=G.meeples.filter(m=>m!==ca.guard);
+    if(ca.guard&&ca.guard.big)pl.big++;else pl.meeples++;
+    pl.cas++;
+    G.castles=G.castles.filter(q=>q!==ca);
+    const msg=`${pl.name}的城堡随${KN[c.kind]}完成 +${pts}`;
+    addLog(msg);G.toasts.push(msg);
+    if(!REPLAY) G.fx.waves.push({tiles:ca.tiles.slice(),pts,kind:'castle',win:[ca.p],color:pl.color,loot:[],final:false});
+  }
+}
+function bzStart(){
+  if(!has('bcb')||!G||G.bzDone||G.bzMode||!G.pos) return false;
+  const [x,y]=G.pos,t=G.board[x+','+y];
+  if(!t||!t.bazaar) return false;
+  G.bzDone=true;
+  const pool=[];
+  let dropped=0;
+  while(pool.length<3&&G.deck.length){
+    const k=G.deck.pop();
+    if(Object.keys(legalMap(k)).length) pool.push(k);else dropped++;
+  }
+  if(pool.length<2){addLog('牌堆里可放置的地块不足，集市取消');return false}
+  G.bz={tiles:pool,taken:[],order:[G.turn,1-G.turn],idx:0,picks:[],stage:0,orig:[x,y],turn:G.turn,dbl:!!G.dbl,second:!!G.second};
+  G.bzMode=true;
+  G.phase='bzpick';G.cur=null;G.legal={};G.pos=null;G.hover=null;G.sel=null;G.chooseN=null;G.opts=[];G.allOpts={m:[],b:[],p:[],a:[]};
+  addLog(`集市：翻开 ${pool.length} 块地块${dropped?`（弃置 ${dropped} 块无处可放）`:''}`);
+  if(!REPLAY){sfx('token');saveSession();render()}
+  return true;
+}
+function doBzPick(i){
+  if(!G||G.phase!=='bzpick'||!G.bz) return false;
+  const bz=G.bz;
+  if(i<0||i>=bz.tiles.length||bz.taken.indexOf(i)>=0) return false;
+  const p=bz.order[bz.idx];
+  if(p==null) return false;
+  G.acts.push({t:'bzpick',i});
+  bz.taken.push(i);bz.picks.push(bz.tiles[i]);
+  addLog(`${G.players[p].name}在集市挑中${TN[bz.tiles[i]]||bz.tiles[i]}`);
+  bz.idx++;
+  if(bz.idx<bz.order.length){sfx('select');if(!REPLAY)render()}
+  else{
+    const left=bz.tiles.length-bz.taken.length;
+    if(left>0) addLog(`集市剩下 ${left} 块地块弃置`);
+    startBzPlace(0);
+  }
+  if(!REPLAY)saveSession();
+  return true;
+}
+function startBzPlace(stage){
+  const bz=G.bz;if(!bz) return;
+  bz.stage=stage;
+  if(stage>=bz.order.length){bzFinish();return}
+  const p=bz.order[stage],type=bz.picks[stage];
+  G.turn=p;G.cur=type;G.curRot=0;G.cellRot={};G.hover=null;G.sel=null;G.chooseN=null;G.opts=[];G.allOpts={m:[],b:[],p:[],a:[]};G.fig=null;G.pos=null;G.pre=[];G.post=[];G.bzMode=true;
+  G.legal=legalMap(type);
+  if(!Object.keys(G.legal).length){
+    addLog(`集市：${G.players[p].name}挑的地块已无处可放，弃置`);
+    startBzPlace(stage+1);return;
+  }
+  G.st[p].bazaar++;
+  G.phase='place';
+  addLog(`集市：${G.players[p].name}放置挑中的地块`);
+  if(!REPLAY){sfx('turn');saveSession();render()}
+}
+function bzAfterPlace(){
+  const bz=G.bz;
+  if(!bz){G.bzMode=false;concludeTurn();return}
+  if(bz.stage+1<bz.order.length){startBzPlace(bz.stage+1);return}
+  bzFinish();
+}
+function bzFinish(){
+  const bz=G.bz||{};
+  G.bzMode=false;G.bz=null;G.bzDone=true;
+  if(bz.turn!=null){G.turn=bz.turn;G.dbl=!!bz.dbl;G.second=!!bz.second}
+  G.cur=null;G.legal={};G.pos=bz.orig||G.pos;G.hover=null;G.sel=null;G.chooseN=null;G.opts=[];G.allOpts={m:[],b:[],p:[],a:[]};
+  addLog('集市结束');
+  const t=G.pos&&G.board[G.pos[0]+','+G.pos[1]];
+  if(t&&has('crop')&&t.crop){G.cropT=t.crop;G.cchoice=null;G.phase='cchoice';render();return}
+  concludeTurn();
+}
 function nextPost(){
   while(G.post.length){
     const ph=G.post.shift();
@@ -3115,6 +3275,11 @@ function nextPost(){
       if(!cands.length) continue;
       G.brCands=cands;G.brTile=cands.length===1?cands[0]:null;G.brA=null;G.phase='bridge';return;
     }
+    if(ph==='castle'){
+      const cs=castleCands();
+      if(!cs.length) continue;
+      G.castleCand=cs[0];G.phase='castle';return;
+    }
   }
   endTurn();
 }
@@ -3122,7 +3287,9 @@ function endTurn(){
   const x=G.pos[0],y=G.pos[1];
   G.toasts=[];
   scoreAfter(x,y);
-  G.msgs=G.toasts;G.toasts=[];
+  G.msgs=(G.bzMode&&G.msgs?G.msgs:[]).concat(G.toasts);G.toasts=[];
+  if(G.bzMode){bzAfterPlace();return}
+  if(bzStart()) return;
   const t=G.board[x+','+y];
   if(has('crop')&&t.crop){G.cropT=t.crop;G.cchoice=null;G.phase='cchoice';return}
   concludeTurn();
@@ -3222,6 +3389,8 @@ function applyAct(a){
   if(a.t==='magic') return doMagic(a);
   if(a.t==='fplace'||a.t==='fmove'||a.t==='fskip') return doFerry(a);
   if(a.t==='bridge'||a.t==='bskip') return doBridge(a);
+  if(a.t==='castle'||a.t==='cskip') return doCastle(a);
+  if(a.t==='bzpick') return doBzPick(a.i|0);
   if(a.t==='fest') return doFest(a.i|0);
   if(a.t==='phantom') return doPhantom(a.fi==null?null:a.fi|0);
   if(a.t==='cchoice'||a.t==='cact') return doCrop(a);
@@ -3445,7 +3614,7 @@ function flyToPanel(spr,from,to,p,delay){
   }});
 }
 function playFx(){
-  const f=G.fx;G.fx={tile:null,meeple:null,bridge:null,scores:[],flash:[],waves:[],freed:[],lootPending:[]};
+  const f=G.fx;G.fx={tile:null,meeple:null,bridge:null,castle:null,scores:[],flash:[],waves:[],freed:[],lootPending:[]};
   if(f.tile) sfx('place');
   if(f.meeple) sfx('meeple');
   if(G.over) return;
@@ -3466,6 +3635,16 @@ function playFx(){
       shockRing(mx,my,'#f0cf8e',2,74,0);
       const c=w2s(mx,my);screenBurst(c[0],c[1],14,['#f0cf8e','#a9713c','#fff4d6'],60);stageShake(1);
     },base);
+  }
+  if(f.castle){
+    const [cx,cy,cfi]=f.castle,t0=G.board[cx+','+cy],ft=t0&&t0.feats[cfi];
+    if(ft){
+      const wx=cx*100+ft.ax,wy=cy*100+ft.ay;
+      setTimeout(()=>{
+        shockRing(wx,wy,'#e8c14a',3,120,0);
+        const c=w2s(wx,wy);screenBurst(c[0],c[1],16,['#e8c14a','#b13a2a','#fff4d6'],64);stageShake(1);
+      },base);
+    }
   }
   f.waves.forEach((w,wi)=>{
     const start=base+wi*1000,combo=many>1?wi+1:0;
@@ -4321,7 +4500,7 @@ function onData(m){
     case 'sync': handleSync(m);return;
     case 'nudge': alertUser('对方在等你操作','nudge');return;
     case 'bye': if(G){G.left=true;stopRecon();showBanner('对方已离开对局。')}return;
-    case 'place': case 'meeple': case 'gold': case 'magic': case 'fplace': case 'fmove': case 'fskip': case 'bridge': case 'bskip': case 'fest': case 'phantom': case 'cchoice': case 'cact': case 'flysel': if(G&&G.mode!=='local'&&actorNow()!==G.me) applyAct(m);return;
+    case 'place': case 'meeple': case 'gold': case 'magic': case 'fplace': case 'fmove': case 'fskip': case 'bridge': case 'bskip': case 'castle': case 'cskip': case 'bzpick': case 'fest': case 'phantom': case 'cchoice': case 'cact': case 'flysel': if(G&&G.mode!=='local'&&actorNow()!==G.me) applyAct(m);return;
   }
 }
 function localPlace(x,y,rot){const before=G.acts.length;if(doPlace(x,y,rot))send(G.acts[before])}
@@ -4482,6 +4661,7 @@ function renderBoard(){
   }
   if(G.last) tiles+=`<rect class="lastT" x="${G.last[0]*100+2}" y="${G.last[1]*100+2}" width="96" height="96"/>`;
   for(const m of (G.animMeeples||G.meeples)){
+    if(m.cs) continue;
     const f=G.board[m.x+','+m.y].feats[m.fi];
     if(m.ab) mp+=`<g${m===G.fx.meeple?' id="lastMeeple"':''} transform="translate(${(m.x*100+f.ax).toFixed(1)} ${(m.y*100+f.ay).toFixed(1)}) scale(1.1)"><g>${useS(spk('a',m.p),0,0)}</g></g>`;
     else if(m.b||m.pig) mp+=`<g${m===G.fx.meeple?' id="lastMeeple"':''} transform="translate(${(m.x*100+f.ax+(m.b?13:-13)).toFixed(1)} ${(m.y*100+f.ay+(m.b?-6:10)).toFixed(1)})"><g>${useS(spk(m.b?'b':'p',m.p),0,0)}</g></g>`;
@@ -4501,6 +4681,11 @@ function renderBoard(){
     }
     const n=G.ingot&&G.ingot[k];
     if(n) for(let i=0;i<n;i++) mp+=useS('gold',p[0]*100+16+i*14,p[1]*100+84);
+  }
+  for(const ca of (G.castles||[])){
+    const ct=G.board[ca.x+','+ca.y],cf=ct&&ct.feats[ca.fi];
+    if(!cf) continue;
+    mp+=`<g pointer-events="none" transform="translate(${(ca.x*100+cf.ax).toFixed(1)} ${(ca.y*100+cf.ay).toFixed(1)})">${useS('cs'+ca.p,0,0)}</g>`;
   }
   ['mage','witch'].forEach(f=>{
     const n=G.magic[f];if(!n) return;
@@ -4570,6 +4755,9 @@ function renderOverlay(){
         });
       }
     }
+    if(G.phase==='castle'&&G.castleCand){
+      comp(G.castleCand.x,G.castleCand.y,G.castleCand.fi).tileSet.forEach(k=>{const p=k.split(',').map(Number);h+=`<rect class="cell pick" x="${p[0]*100+3}" y="${p[1]*100+3}" width="94" height="94"/>`});
+    }
     if(G.phase==='cact') G.copts.forEach((o,oi)=>{
       const f=G.board[o.x+','+o.y].feats[o.fi],u=useS(fk(f.kind,G.cropActor),0,0);
       h+=`<g class="anc" data-o="${oi}" transform="translate(${(o.x*100+f.ax).toFixed(1)} ${(o.y*100+f.ay).toFixed(1)}) scale(.9)"><circle class="ancC" r="15"/>${f.kind==='field'?`<g transform="rotate(90)">${u}</g>`:u}</g>`;
@@ -4630,7 +4818,7 @@ function hintText(){
   if(!myTurn()) return `等待${name}操作…`;
   const touch=isCoarse();
   if(G.phase==='place') return touch?'所有能放的位置都有虚影。点一个虚影预览，再点一次或按「确认放置」；虚影角上的 ↻ 可单独旋转。':'所有能放的位置都有虚影，直接点击放置；虚影角上的 ↻ 可单独旋转，R 键转动全部。';
-  const phs={gold:'金矿：把第二个金锭放在相邻（含斜角）的任意地块上。',magic:'选择法师或女巫，再点一个未完成的城市或道路放置。',fplace:'放置渡口：依次点两条道路的端点把它们连通。',fmove:'可以移动靠近新地块的渡口：先点该湖泊地块，再依次点两条道路端点；也可以不移动。',bridge:'架设桥梁：先点发光的地块（新地块或上下左右相邻），再依次点两个道路端点把它连通；每回合最多一座。',cchoice:'麦田怪圈：选择 A（增加随从）或 B（撤回随从），双方都要执行。',cact:G.cchoice==='A'?'麦田怪圈：点一个已有你同类随从的要素，增加一个随从。':'麦田怪圈：点一个你的同类随从，把它撤回。',fest:'节日：点一个自己的随从收回；也可以取消后正常放随从。',phantom:'幽灵：点新地块上的空闲领地放幽灵，或点「不放幽灵」。'};
+  const phs={gold:'金矿：把第二个金锭放在相邻（含斜角）的任意地块上。',magic:'选择法师或女巫，再点一个未完成的城市或道路放置。',fplace:'放置渡口：依次点两条道路的端点把它们连通。',fmove:'可以移动靠近新地块的渡口：先点该湖泊地块，再依次点两条道路端点；也可以不移动。',bridge:'架设桥梁：先点发光的地块（新地块或上下左右相邻），再依次点两个道路端点把它连通；每回合最多一座。',castle:'城堡：选择改建成城堡（本次不计分，之后相邻要素完成时按基础分结算），或正常计分。',bzpick:'集市：点一张牌挑走（或按 1–3），先由当前玩家挑，再由对手挑；挑完后各自放置。',cchoice:'麦田怪圈：选择 A（增加随从）或 B（撤回随从），双方都要执行。',cact:G.cchoice==='A'?'麦田怪圈：点一个已有你同类随从的要素，增加一个随从。':'麦田怪圈：点一个你的同类随从，把它撤回。',fest:'节日：点一个自己的随从收回；也可以取消后正常放随从。',phantom:'幽灵：点新地块上的空闲领地放幽灵，或点「不放幽灵」。'};
   if(phs[G.phase]) return phs[G.phase];
   const portal=false;
   const f=G.cfg.farmers?'（躺着的是农夫，终局才计分）':'';
@@ -4662,10 +4850,12 @@ function renderPanel(){
   $$('[data-act="cA"],[data-act="cB"]').forEach(b=>{b.hidden=!(G.phase==='cchoice'&&mine)});
   $$('[data-act="fskip"]').forEach(b=>{b.hidden=!(G.phase==='fmove'&&mine)});
   $$('[data-act="bskip"]').forEach(b=>{b.hidden=!(G.phase==='bridge'&&mine)});
+  $$('[data-act="casBuild"],[data-act="casSkip"]').forEach(b=>{b.hidden=!(G.phase==='castle'&&mine)});
   const okConfirm=place?!!(G.hover&&G.legal[G.hover]):(mp&&G.sel!==null&&G.sel!==undefined);
   $$('[data-act="confirm"]').forEach(b=>{b.disabled=!okConfirm;b.textContent=mp?'放置随从':'确认放置'});
   $$('[data-act="nudge"]').forEach(b=>{b.hidden=!(G.mode!=='local'&&!myTurn()&&!G.over)});
   $('log').innerHTML=G.log.slice(0,40).map(l=>`<li>${l}</li>`).join('');
+  renderBzPick();
   promptRender();
   $('stage').style.setProperty('--tc',G.over?'transparent':G.players[G.turn].color);
   panelFx();
@@ -4689,6 +4879,16 @@ function meepleNodes(){
   return res;
 }
 function hideChoose(){const c=$('choose');if(c)c.hidden=true}
+function renderBzPick(){
+  const box=$('bzPick');if(!box) return;
+  if(!G||G.over||G.phase!=='bzpick'||!G.bz||!$('lobby').hidden){box.hidden=true;return}
+  const bz=G.bz,can=canAct();
+  box.innerHTML=bz.tiles.map((k,i)=>{
+    const taken=bz.taken.indexOf(i)>=0;
+    return `<button type="button" data-bzp="${i}"${taken||!can?' disabled':''} aria-label="${TN[k]||k}"><svg viewBox="0 0 100 100">${tileG(k,0,0,0)}</svg></button>`;
+  }).join('');
+  box.hidden=false;
+}
 function placeFab(){
   const c=$('choose');if(!c) return;
   if(!G||G.over||G.phase!=='meeple'||G.chooseN==null||!canAct()||!$('lobby').hidden){c.hidden=true;return}
@@ -4716,6 +4916,8 @@ function promptInfo(){
     case 'fplace': return {step:'渡口',txt:'依次点两条道路的端点，把它们连起来'};
     case 'fmove': return {step:'渡口',txt:G.fsel?'依次点两条道路端点来移动渡口':'点发光的湖泊地块来移动渡口，或选择不移动'};
     case 'bridge': return {step:'桥梁',txt:G.brTile?'依次点两个道路端点，把两段独立的路连起来':'点发光的地块，选择在哪块板上架桥'};
+    case 'castle': return {step:'城堡',txt:'这是一座刚完成的两块小城：改建成城堡可之后按相邻要素得分，但本次不计分'};
+    case 'bzpick': return {step:'集市',txt:`${G.players[G.bz.order[G.bz.idx]]&&G.players[G.bz.order[G.bz.idx]].name}挑选地块（点击或按 1–3）`};
     case 'fly': return {step:'飞行器',txt:`骰到 ${G.flyRoll}：点一个要降落的要素`};
     case 'fest': return {step:'节日',txt:'点一个自己的随从，把它收回手边；本回合不再放随从'};
     case 'phantom': return {step:'幽灵',txt:'点刚放地块上的空闲领地放下幽灵，或者选择不放'};
@@ -4884,7 +5086,11 @@ window.addEventListener('keydown',e=>{
     else if(G.phase==='phantom'){e.preventDefault();localAct({t:'phantom',fi:null})}
     else if(G.phase==='fmove'){e.preventDefault();localAct({t:'fskip'})}
     else if(G.phase==='bridge'){e.preventDefault();localAct({t:'bskip'})}
+    else if(G.phase==='castle'){e.preventDefault();localAct({t:'cskip'})}
     else if(G.phase==='fest'){e.preventDefault();G.phase='meeple';G.festOpts=null;renderOverlay();renderPanel()}
+  }else if(G&&canAct()&&G.phase==='bzpick'&&/^[1-3]$/.test(e.key)){
+    const idxs=G.bz.tiles.map((k,i)=>i).filter(i=>G.bz.taken.indexOf(i)<0),i=idxs[+e.key-1];
+    if(i!=null) localAct({t:'bzpick',i});
   }else if(G&&canAct()&&G.phase==='cchoice'&&(e.key==='a'||e.key==='A'||e.key==='b'||e.key==='B'))localAct({t:'cchoice',c:e.key.toUpperCase()});
 });
 
@@ -4899,6 +5105,8 @@ function act(a){
     case 'cA': case 'cB': if(G&&G.phase==='cchoice'&&canAct())localAct({t:'cchoice',c:a==='cA'?'A':'B'});break;
     case 'fskip': if(G&&G.phase==='fmove'&&canAct())localAct({t:'fskip'});break;
     case 'bskip': if(G&&G.phase==='bridge'&&canAct())localAct({t:'bskip'});break;
+    case 'casBuild': if(G&&G.phase==='castle'&&canAct())localAct({t:'castle'});break;
+    case 'casSkip': if(G&&G.phase==='castle'&&canAct())localAct({t:'cskip'});break;
     case 'rab': if(G&&G.phase==='meeple'&&canAct())localMeeple(null,false,'ret');break;
     case 'fest': if(G&&G.phase==='meeple'&&canAct()){G.festOpts=festList();if(!G.festOpts.length)break;G.phase='fest';G.sel=null;G.chooseN=null;hideChoose();sfx('select');renderOverlay();renderPanel()}break;
     case 'fcancel': if(G&&G.phase==='fest'&&canAct()){G.phase='meeple';G.festOpts=null;renderOverlay();renderPanel()}break;
@@ -5021,6 +5229,9 @@ function renderStats(){
     if(has('fly')) ex.push(['飞行',s[0].fly||0,s[1].fly||0]);
     if(has('ferry')) ex.push(['渡口操作',s[0].ferry||0,s[1].ferry||0]);
     if(has('bcb')&&(s[0].bridge||s[1].bridge)) ex.push(['桥梁',s[0].bridge||0,s[1].bridge||0]);
+    if(has('bcb')&&(s[0].castlePts||s[1].castlePts)) ex.push(['城堡得分',s[0].castlePts||0,s[1].castlePts||0]);
+    if(has('bcb')&&(s[0].castle||s[1].castle)) ex.push(['城堡触发',s[0].castle||0,s[1].castle||0]);
+    if(has('bcb')&&(s[0].bazaar||s[1].bazaar)) ex.push(['集市放置',s[0].bazaar||0,s[1].bazaar||0]);
     if(has('magic')) ex.push(['法师/女巫',s[0].magic||0,s[1].magic||0]);
     if(has('goods')){
       let gtot=[0,0];
@@ -5057,6 +5268,11 @@ document.addEventListener('click',e=>{
   if(!b||b.disabled) return;
   const a=b.getAttribute('data-act');if(a!=='rot')sfx('click');
   act(a);
+});
+document.addEventListener('click',e=>{
+  const b=e.target.closest&&e.target.closest('[data-bzp]');
+  if(!b||b.disabled) return;
+  if(G&&G.phase==='bzpick'&&canAct()) localAct({t:'bzpick',i:+b.getAttribute('data-bzp')});
 });
 document.addEventListener('pointerdown',unlockAudio,{passive:true});
 
