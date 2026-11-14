@@ -384,35 +384,93 @@ button:disabled{opacity:.4;cursor:default}
   .sm{min-height:36px}
 }
 /* ---------- 冬季 / 圣诞皮肤 ---------- */
-#snowfx{position:fixed;inset:0;z-index:60;pointer-events:none;opacity:0;transition:opacity .8s;
+#snowfx{position:fixed;inset:0;z-index:60;pointer-events:none;opacity:0;transition:opacity .8s}
+#snowfx canvas{display:block;width:100%;height:100%}
+body.winter #snowfx{opacity:1}
+body.winter{background:#06111e}
+body.winter #stage{
+  background-image:radial-gradient(900px 620px at 45% 38%,rgba(4,12,22,.26),rgba(2,7,14,.72)),var(--xmas-url,none);
+  background-size:auto,cover;background-position:center,center bottom;background-repeat:no-repeat}
+body.winter #lobby{
+  background-image:radial-gradient(1100px 760px at 62% 42%,rgba(4,12,22,.40),rgba(1,5,11,.84)),var(--xmas-url,none);
+  background-size:auto,cover;background-position:center,center bottom;background-repeat:no-repeat}
+body.winter #stage::after{box-shadow:inset 0 0 36px rgba(3,10,18,.5),inset 0 0 96px rgba(120,176,222,.16),inset 0 0 16px rgba(214,238,255,.14)}
+/* 操作提示栏：顶部松枝花环 + 左侧花环 */
+body.winter #prompt{padding-top:15px;padding-left:44px;border-bottom-color:#153a2c;
+  background-image:linear-gradient(180deg,rgba(206,232,250,.30),rgba(233,215,168,0) 18px),var(--parch-url,none);
+  background-size:auto,96px;background-repeat:no-repeat,repeat}
+body.winter #prompt::before{content:"";position:absolute;left:0;right:0;top:0;height:11px;background:var(--garland-url,none) repeat-x left top/24px 11px;image-rendering:pixelated;pointer-events:none}
+body.winter #prompt::after{content:"";position:absolute;left:7px;top:50%;transform:translateY(-50%);width:30px;height:30px;background:var(--wreath-url,none) center/contain no-repeat;image-rendering:pixelated;pointer-events:none;filter:drop-shadow(0 2px 0 rgba(0,0,0,.3))}
+body.winter .pStep{box-shadow:inset 2px 2px 0 rgba(255,255,255,.35),0 0 0 2px rgba(198,228,255,.18)}
+/* 侧栏卷轴：深松绿底、花环彩灯、霜色滚动轴 */
+body.winter #panel{
+  position:relative;
   background:
-    radial-gradient(1.7px 1.7px at 20% 10%,rgba(255,255,255,.92) 50%,transparent 51%) 0 0/190px 190px,
-    radial-gradient(1.2px 1.2px at 70% 40%,rgba(255,255,255,.7) 50%,transparent 51%) 0 0/130px 130px,
-    radial-gradient(2px 2px at 45% 80%,rgba(255,255,255,.85) 50%,transparent 51%) 0 0/260px 260px;
-  animation:snowfall 24s linear infinite}
-#snowfx::before,#snowfx::after{content:"";position:absolute;inset:0;pointer-events:none}
-#snowfx::before{opacity:.5;
-  background:
-    radial-gradient(2.6px 2.6px at 32% 22%,rgba(255,255,255,.72) 50%,transparent 51%) 0 0/370px 370px,
-    radial-gradient(2.2px 2.2px at 78% 62%,rgba(226,240,252,.6) 50%,transparent 51%) 0 0/300px 300px;
-  animation:snowfallMid 52s linear infinite}
-#snowfx::after{opacity:.38;
-  background:
-    radial-gradient(3.4px 3.4px at 58% 14%,rgba(255,255,255,.5) 50%,transparent 51%) 0 0/520px 520px,
-    radial-gradient(3px 3px at 12% 58%,rgba(210,232,248,.42) 50%,transparent 51%) 0 0/440px 440px;
-  animation:snowfallFar 86s linear infinite}
-body.winter #snowfx{opacity:.48}
-@keyframes snowfall{to{background-position:0 190px,0 130px,0 260px}}
-@keyframes snowfallMid{to{background-position:0 370px,0 300px}}
-@keyframes snowfallFar{to{background-position:0 520px,0 440px}}
-body.winter #lobby{background-image:radial-gradient(1000px 700px at 70% 45%,rgba(8,20,32,.15),rgba(0,0,0,.62)),linear-gradient(180deg,rgba(120,165,200,.16),rgba(0,0,0,0))}
-body.winter #stage{background-image:radial-gradient(900px 600px at 45% 38%,rgba(120,165,200,.10),rgba(0,0,0,.58)),var(--wood-url,none)}
-body.winter #stage::after{box-shadow:inset 0 0 36px rgba(4,15,26,.38),inset 0 0 92px rgba(138,190,230,.14),inset 0 0 16px rgba(214,238,255,.16)}
-body.winter #dock,body.winter #prompt{box-shadow:inset 0 0 14px rgba(150,198,235,.18),0 0 0 1px rgba(198,228,255,.22)}
+    radial-gradient(2px 2px at 22% 14%,rgba(255,255,255,.14) 50%,transparent 52%) 0 0/56px 56px,
+    radial-gradient(1px 1px at 74% 52%,rgba(255,255,255,.12) 50%,transparent 52%) 0 0/38px 38px,
+    linear-gradient(180deg,#0b241c,#061611);
+}
+body.winter #panel::before{content:"";position:absolute;right:7px;top:-2px;width:32px;height:32px;background:var(--wreath-url,none) center/contain no-repeat;image-rendering:pixelated;pointer-events:none;filter:drop-shadow(0 3px 0 rgba(0,0,0,.4));z-index:4}
+body.winter #scroll{
+  --ink:#eaf4fb;--ink2:#b9d3e2;--parch:#0d2a21;--parch2:#153e2e;--parch3:#2a6a48;
+  position:relative;padding-top:30px;color:#eaf4fb;
+  background-color:#0d2a21;
+  background-image:linear-gradient(180deg,rgba(214,238,255,.13),rgba(0,0,0,0) 54px),var(--xmas-panel-url,none);
+  background-size:auto,48px 48px;
+  border-left:5px solid #08201a;border-right:5px solid #08201a;
+  box-shadow:inset 4px 0 0 rgba(232,193,74,.16),inset -4px 0 0 rgba(232,193,74,.16),0 0 0 2px rgba(232,193,74,.30),0 0 18px rgba(0,0,0,.35);
+}
+body.winter #scroll::before{content:"";position:absolute;left:0;right:0;top:4px;height:22px;
+  background:var(--garland-url,none) repeat-x left top/24px 11px,var(--lights-url,none) repeat-x left 11px/32px 11px;
+  image-rendering:pixelated;pointer-events:none;z-index:1}
+body.winter #panel .rollbar{border-color:#08201a;
+  background:linear-gradient(to bottom,#f4fbff 0 14%,#dcecf7 14% 26%,#1a4a38 26% 54%,#123a2c 54% 80%,#0a231b 80% 100%);
+  box-shadow:0 0 0 1px rgba(198,228,255,.14),inset 0 2px 0 rgba(255,255,255,.5)}
+body.winter #panel .rollbar::before,body.winter #panel .rollbar::after{background:#123a2c;border-color:#08201a}
+/* 玩家卡 / 状态 / 预览 / 按钮 */
+body.winter #scroll .pl{background:#123a2c;border-color:#dcecf7;background-image:linear-gradient(180deg,rgba(222,240,252,.22),rgba(255,255,255,0) 10px);box-shadow:inset 2px 2px 0 rgba(255,255,255,.14),inset -2px -2px 0 rgba(0,0,0,.28)}
+body.winter #scroll .pl.on{background:#1c5038;box-shadow:0 0 0 3px var(--gold),0 0 0 6px #0a1f18,inset 2px 2px 0 rgba(255,255,255,.2)}
+body.winter #scroll .plName em{background:#a53a2c;color:#fff4d6}
+body.winter #scroll .net{background:#153e2e;border-color:#dcecf7;color:#eaf4fb}
+body.winter #scroll .net::before{background:#9ec3d8}
+body.winter #scroll .net.ok::before{background:#8fe0a8}
+body.winter #scroll .net.bad::before{background:#ff9a86}
+body.winter #panel .prev{background:#071a14;border-color:#dcecf7;box-shadow:0 0 0 2px #0a1f18,inset 0 0 0 2px rgba(232,193,74,.42)}
+body.winter #scroll .hand{outline:2px dashed rgba(232,193,74,.34);outline-offset:5px}
+body.winter #scroll .dkBar{background:#071a14;border-color:#9ec3d8}
+body.winter #scroll .tmBar{background:#071a14;border-color:#9ec3d8}
+body.winter #scroll .btn{background:#17402f;border-color:#dcecf7;color:#eaf4fb;box-shadow:inset 2px 2px 0 rgba(255,255,255,.22),inset -2px -2px 0 rgba(0,0,0,.35)}
+body.winter #scroll .btn:hover{background:#1f523a}
+body.winter #scroll .btn.on{background:var(--gold);color:#2b1d14}
+body.winter #scroll .ghost{border-color:#9ec3d8;color:#dcecf7}
+body.winter #scroll .ghost:hover{background:rgba(255,255,255,.10)}
+body.winter #scroll .primary{border-color:#08201a;box-shadow:inset 2px 2px 0 rgba(255,214,150,.35),inset -2px -2px 0 rgba(70,16,12,.5)}
+body.winter #scroll #log{border-top-color:#2a6a48;scrollbar-color:#2a6a48 #0a231b;scrollbar-width:thin}
+body.winter #scroll #log li{border-bottom-color:rgba(214,238,255,.16)}
+body.winter #scroll #log li:first-child{color:#f6e7b0}
+body.winter #scroll #log::-webkit-scrollbar{width:10px}
+body.winter #scroll #log::-webkit-scrollbar-track{background:#0a231b;border-left:2px solid #08201a}
+body.winter #scroll #log::-webkit-scrollbar-thumb{background:#2a6a48;border:2px solid #0a231b}
+/* 手机底栏：彩灯串 + 雪顶 */
+body.winter #dock{position:relative;padding-top:16px;border-top-color:#153a2c;
+  background-image:linear-gradient(180deg,rgba(206,232,250,.28),rgba(233,215,168,0) 18px),var(--parch-url,none);
+  background-size:auto,96px;background-repeat:no-repeat,repeat}
+body.winter #dock::before{content:"";position:absolute;left:0;right:0;top:0;height:11px;background:var(--lights-url,none) repeat-x left top/32px 11px;image-rendering:pixelated;pointer-events:none}
+/* 玩家条 / 按钮的圣诞配色与积雪高光 */
+body.winter .pl,body.winter .chip{background-image:linear-gradient(180deg,rgba(222,240,252,.55),rgba(255,255,255,0) 9px)}
+body.winter .pl.on,body.winter .chip.on{background-image:linear-gradient(180deg,rgba(222,240,252,.5),rgba(255,255,255,0) 10px)}
+body.winter .btn{background-image:linear-gradient(180deg,rgba(255,255,255,.35),rgba(255,255,255,0) 40%)}
+body.winter .btn:hover{background:#eee0b9}
+body.winter .primary{background-color:#a53a2c;border-color:#16261f;box-shadow:inset 3px 3px 0 rgba(255,214,150,.35),inset -3px -3px 0 rgba(70,16,12,.5),0 0 0 1px rgba(198,228,255,.18)}
+body.winter .primary:hover{background-color:#bd4a38}
 body.winter .hudMid{filter:drop-shadow(0 0 5px rgba(168,212,246,.42))}
 body.winter .pxbox{filter:drop-shadow(0 0 7px rgba(146,196,232,.26))}
-@media (max-width:700px){#snowfx::before{opacity:.42}#snowfx::after{display:none}}
-@media (prefers-reduced-motion:reduce){*,#snowfx::before,#snowfx::after{transition:none!important;animation:none!important}}
+/* 大厅：卷轴顶部的花环 */
+body.winter .lobbyCard{position:relative}
+body.winter .lobbyCard::before{content:"";position:absolute;left:50%;top:-27px;transform:translateX(-50%);width:48px;height:48px;background:var(--wreath-url,none) center/contain no-repeat;image-rendering:pixelated;pointer-events:none;filter:drop-shadow(0 3px 0 rgba(0,0,0,.32));z-index:3}
+@media (max-width:700px){body.winter #prompt{padding-left:10px}body.winter #prompt::after{display:none}}
+@media (prefers-reduced-motion:reduce){*,body.winter #prompt::before,body.winter #scroll::before,body.winter #dock::before{transition:none!important;animation:none!important}}
+
 </style>
 </head>
 <body>
@@ -511,7 +569,6 @@ body.winter .pxbox{filter:drop-shadow(0 0 7px rgba(146,196,232,.26))}
           <details class="cfg" id="cfgBox">
             <summary>对局设置</summary>
             <div class="cfgBody">
-              <label class="fld"><span>农夫（田野）计分</span><input type="checkbox" id="cfgFarm" checked></label>
               <label class="fld"><span>回合时限</span>
                 <select id="cfgLimit">
                   <option value="0">不限时</option><option value="30">30 秒</option><option value="45">45 秒</option>
@@ -2164,6 +2221,222 @@ const woodURL=()=>texURL(64,64,(i,j)=>{
 });
 const parchURL=()=>texURL(32,32,(i,j)=>{const h=hash(i,j,5);return h<.07?'#e1cd98':(h<.12?'#f1e2b8':(h>.985?'#c9ae74':'#e9d7a8'))});
 
+/* ---- 圣诞皮肤：像素雪村夜景、松枝花环、彩灯、花圈（全部代码绘制） ---- */
+const xmasURL=()=>{
+  const W=480,H=270,px=new Uint8Array(W*H*4);
+  const put=(x,y,c)=>{x|=0;y|=0;if(x<0||y<0||x>=W||y>=H)return;setPx(px,W,x,y,c)};
+  /* 夜空：分段渐变 + 抖动过渡 */
+  const sky=['#040a14','#06101e','#081728','#0b1e33','#0f273e','#133049','#173b57','#1b4562'];
+  for(let y=0;y<192;y++){
+    const t=y/192*(sky.length-1),b=Math.min(sky.length-2,t|0),f=t-b;
+    for(let x=0;x<W;x++)put(x,y,hash(x,y,7)<f?sky[b+1]:sky[b]);
+  }
+  /* 星星 */
+  for(let i=0;i<240;i++){
+    const x=(hash(i,1,11)*W)|0,y=(hash(i,2,12)*150)|0;
+    if(Math.hypot(x-372,y-50)<27)continue;
+    const q=hash(i,3,13);
+    put(x,y,q<.14?'#f6fbff':(q<.5?'#cfe0f0':'#9fb9cd'));
+    if(q>.93){put(x-1,y,'#8ea9bf');put(x+1,y,'#8ea9bf');put(x,y-1,'#8ea9bf');put(x,y+1,'#8ea9bf')}
+  }
+  /* 月亮与光晕 */
+  for(let y=14;y<92;y++)for(let x=332;x<412;x++){
+    const d=Math.hypot(x-372,y-50),q=hash(x,y,21);
+    if(d<16.2)put(x,y,d<13.2?'#f7f0d4':(d<14.8?'#e9dfb8':'#cfc79f'));
+    else if(d<22&&q<.34)put(x,y,'#27455e');
+    else if(d<29&&q<.15)put(x,y,'#1d364c');
+  }
+  /* 薄云 */
+  for(let i=0;i<7;i++){
+    const cy=76+i*11,w=50+hash(i,4,31)*90,cx=hash(i,5,32)*W;
+    for(let x=0;x<w;x++){
+      const yy=cy+Math.round(Math.sin(x*.09+i)*1.6);
+      put(cx+x,yy,i%2?'#0e2436':'#122b40');
+      if(x%7<3)put(cx+x,yy+1,'#0a1a29');
+    }
+  }
+  /* 远山 */
+  for(let x=0;x<W;x++){
+    const top=152-Math.round(24*(.5+.5*Math.sin(x*.017+2.1))+8*Math.sin(x*.049+3.6));
+    for(let y=top;y<196;y++)put(x,y,y<top+3&&hash(x,y,41)<.5?'#7e98b2':'#0a1a2a');
+    for(let dy=0;dy<3;dy++)if(hash(x,top+dy,42)<.6)put(x,top+dy,'#9db8cf');
+  }
+  /* 近处雪丘 */
+  for(let x=0;x<W;x++){
+    const top=197+Math.round(5*Math.sin(x*.03+1.4)+3*Math.sin(x*.083+2.2));
+    for(let y=top;y<H;y++){
+      const q=hash(x,y,61);
+      put(x,y,y<top+2?'#cfdeeb':(q<.1?'#b3c9dc':(q>.93?'#e6f0f9':'#c4d8e6')));
+    }
+  }
+  /* 松树 */
+  const pine=(cx,base,h,dark,lit,seed)=>{
+    const hw=Math.max(3,Math.round(h*.32));
+    for(let k=0;k<h;k++){
+      const half=Math.max(0,Math.round(hw*(k+1)/h)),y=base-h+k;
+      for(let dx=-half;dx<=half;dx++){
+        const q=hash(cx+dx,y,seed);
+        let c=q<.34?lit:dark;
+        if(k<2)c='#e9f3fb';
+        else if(k%7===0&&q<.24)c='#dceaf5';
+        else if(k===h-1)c='#0c271f';
+        put(cx+dx,y,c);
+      }
+    }
+    for(let y=base-2;y<=base+1;y++)put(cx,y,'#2b1c11');
+  };
+  for(let i=0;i<20;i++){
+    const bx=(hash(i,6,51)*W)|0;
+    if(bx>188&&bx<330)continue;
+    pine(bx,206+((hash(i,7,52)*4)|0),9+((hash(i,8,53)*11)|0),'#0f3027','#1a4a38',70+i);
+  }
+  /* 雪村：石屋、暖窗、烟囱炊烟 */
+  const house=(x0,gy,w,h,seed,chimney)=>{
+    for(let y=gy-h;y<gy;y++)for(let x=x0;x<x0+w;x++)
+      put(x,y,(x===x0||x===x0+w-1)?'#241810':(hash(x,y,seed)<.18?'#4a3524':'#3a2a1d'));
+    const rh=Math.round(w*.55),mx=x0+(w>>1);
+    for(let k=0;k<rh;k++){
+      const half=Math.round((w/2+1)*(1-k/rh));
+      for(let dx=-half;dx<=half;dx++){
+        const y=gy-h-k;
+        put(mx+dx,y,k<1?'#eef6fc':(hash(x0+dx,y,seed+3)<.3?'#b9cddd':'#dbe8f3'));
+      }
+    }
+    put(x0+1,gy-1,'#20140c');put(x0+1,gy-2,'#20140c');
+    const wy=gy-h+4;
+    for(let i=0;i<2;i++){
+      const wx=x0+3+i*4;
+      put(wx,wy,'#ffcf6e');put(wx+1,wy,'#f0b048');put(wx,wy+1,'#e8a63c');put(wx+1,wy+1,'#e8a63c');
+    }
+    if(chimney){
+      const cx=x0+w-3,cy=gy-h-rh+1;
+      put(cx,cy,'#4a3524');put(cx,cy-1,'#4a3524');
+      for(let i=1;i<8;i++)put(cx+Math.round(i*.5),cy-1-i*2,i<4?'#b9cddd':'#7e98b2');
+    }
+  };
+  const church=(x0,gy)=>{
+    const w=12,h=20;
+    for(let y=gy-h;y<gy;y++)for(let x=x0;x<x0+w;x++)
+      put(x,y,(x===x0||x===x0+w-1)?'#241810':(hash(x,y,85)<.15?'#4a3524':'#3a2a1d'));
+    const rh=14;
+    for(let k=0;k<rh;k++){
+      const half=Math.round((w*.55)*(1-k/rh));
+      for(let dx=-half;dx<=half;dx++)put(x0+(w>>1)+dx,gy-h-k,k<1?'#eef6fc':'#b9cddd');
+    }
+    put(x0+5,gy-8,'#ffcf6e');put(x0+6,gy-8,'#f0b048');put(x0+5,gy-7,'#e8a63c');
+    const sx=x0+(w>>1),sy=gy-h-rh;
+    put(sx,sy-4,'#e8c14a');put(sx,sy-3,'#f6e7b0');put(sx-1,sy-2,'#e8c14a');put(sx+1,sy-2,'#e8c14a');
+  };
+  house(286,208,16,11,81,true);
+  house(310,211,13,9,82,false);
+  church(336,208);
+  house(356,207,19,12,83,true);
+  house(386,209,11,8,84,false);
+  /* 圣诞树：分层松枝、积雪、彩球、树顶金星 */
+  const xtree=(cx,base,h,seed)=>{
+    const trunkH=Math.max(5,Math.round(h*.06));
+    for(let y=base-trunkH;y<=base+1;y++)for(let dx=-2;dx<=2;dx++)put(cx+dx,y,'#2b1c11');
+    const tiers=5,maxHalf=Math.max(8,Math.round(h*.34)),tierH=Math.round(h*.30);
+    for(let t=0;t<tiers;t++){
+      const tb=base-trunkH-Math.round(t*(h*.72)/(tiers-1));
+      const halfB=Math.max(3,Math.round(maxHalf*(1-t*.16)));
+      for(let k=0;k<tierH;k++){
+        const y=tb-k,half=Math.max(0,Math.round(halfB*(1-k/tierH)));
+        for(let dx=-half;dx<=half;dx++){
+          const q=hash(cx+dx,y,seed+t*7);
+          let c=q<.34?'#1d5a40':(q<.7?'#154732':'#0f3827');
+          if(k>=tierH-2)c='#e9f4fb';
+          else if(k<3&&Math.abs(dx)>half-2&&q<.58)c='#dcecf7';
+          else if(k>2&&k<tierH-3&&Math.abs(dx)<half-1){
+            if(q>.9955)c='#d1493a';
+            else if(q>.9915)c='#f2c94c';
+            else if(q>.9875)c='#5aa0d8';
+          }
+          put(cx+dx,y,c);
+        }
+      }
+    }
+    const sy=base-trunkH-h-2;
+    put(cx,sy-5,'#f6e7b0');put(cx,sy-4,'#f2c94c');put(cx,sy-3,'#f6e7b0');
+    put(cx-1,sy-2,'#f2c94c');put(cx,sy-2,'#fff4c8');put(cx+1,sy-2,'#f2c94c');
+    put(cx,sy-1,'#e8c14a');put(cx,sy,'#c79a2f');
+    put(cx-2,sy-1,'#8a6420');put(cx+2,sy-1,'#8a6420');
+  };
+  xtree(112,244,122,101);
+  xtree(260,232,76,102);
+  xtree(408,242,104,103);
+  /* 前景普通松树与雪堆 */
+  pine(452,246,126,'#0c2921','#174233',92);
+  for(let x=0;x<W;x++){
+    const top=239+Math.round(6*Math.sin(x*.045+2.1)+3*Math.sin(x*.11+.7));
+    for(let y=top;y<H;y++){
+      const q=hash(x,y,71);
+      put(x,y,y<top+2?'#f4faff':(q<.12?'#d7e6f1':(q>.95?'#fbfdff':'#e6f0f9')));
+    }
+  }
+  /* 雪地上的礼物盒 */
+  for(let y=251;y<259;y++)for(let x=34;x<42;x++)put(x,y,(y===255)?'#f2c94c':(x===37||x===38?'#f2c94c':(x===34||x===41?'#7d281d':'#b13a2a')));
+  for(let y=250;y<259;y++)for(let x=62;x<72;x++)put(x,y,(y===254)?'#e8c14a':(x===66||x===67?'#e8c14a':(x===62||x===71?'#7d281d':'#b13a2a')));
+  for(let y=253;y<260;y++)for(let x=78;x<85;x++)put(x,y,(x===81)?'#e8c14a':(y===256?'#e8c14a':'#2f6a4a'));
+  for(let y=249;y<258;y++)for(let x=122;x<132;x++)put(x,y,(y===253)?'#f2c94c':(x===126||x===127?'#f2c94c':(x===122||x===131?'#7d281d':'#b13a2a')));
+  for(let y=253;y<260;y++)for(let x=96;x<104;x++)put(x,y,(x===100)?'#f2c94c':(y===256?'#f2c94c':'#2f6a4a'));
+  return pngURL(W,H,px);
+};
+const garlandURL=()=>{
+  const w=24,h=11,px=new Uint8Array(w*h*4),P=(x,y,c)=>setPx(px,w,x,y,c);
+  for(let x=0;x<w;x++){
+    const sag=Math.round(3*Math.sin(Math.PI*x/(w-1)));
+    P(x,sag,'#f4faff');
+    P(x,1+sag,'#3f8a5e');P(x,2+sag,'#2a6a48');P(x,3+sag,'#1c4a36');P(x,4+sag,'#123528');
+    if(x%6===2){P(x,5+sag,'#d1493a');P(x+1,5+sag,'#b13a2a')}
+    if(x%6===5){P(x,5+sag,'#f2c94c');P(x,6+sag,'#c79a2f')}
+  }
+  return pngURL(w,h,px);
+};
+const lightsURL=()=>{
+  const w=32,h=11,px=new Uint8Array(w*h*4),P=(x,y,c)=>setPx(px,w,x,y,c);
+  for(let x=0;x<w;x++)P(x,1,'#1b2a22');
+  const cols=['#e8c14a','#b13a2a','#5aa0d8','#4f8f3b'];
+  for(let i=0;i<4;i++){
+    const x=3+i*8,c=cols[i];
+    P(x+1,2,'#1b2a22');
+    P(x,3,c);P(x+1,3,c);P(x,4,c);P(x+1,4,c);P(x,5,c);
+    P(x,6,'#f6e7b0');P(x+1,6,'#c79a2f');
+  }
+  return pngURL(w,h,px);
+};
+const wreathURL=()=>{
+  const w=28,h=28,px=new Uint8Array(w*h*4),P=(x,y,c)=>setPx(px,w,x,y,c);
+  const cx=14,cy=13;
+  for(let y=0;y<h;y++)for(let x=0;x<w;x++){
+    const d=Math.hypot(x-cx,y-cy),q=hash(x,y,95);
+    if(d<6.3||d>11.6)continue;
+    let c=q<.4?'#1c4a36':(q<.75?'#2a6346':'#173d2c');
+    if(d<7.4)c='#123528';
+    if(d>10.7&&q>.5)c='#0f2f24';
+    if(y<cy-4&&x<cx+4&&q>.62)c='#e9f4fb';
+    if(q>.975)c='#b13a2a';
+    P(x,y,c);
+  }
+  P(cx-2,1,'#b13a2a');P(cx-1,1,'#b13a2a');P(cx,0,'#b13a2a');P(cx+1,0,'#b13a2a');
+  [[11,22],[12,22],[14,22],[15,22],[16,22]].forEach(p=>P(p[0],p[1],'#b13a2a'));
+  P(13,22,'#8f2b20');P(12,23,'#8f2b20');P(13,23,'#e8c14a');P(14,23,'#8f2b20');P(15,23,'#8f2b20');
+  P(13,24,'#8f2b20');P(14,24,'#8f2b20');
+  return pngURL(w,h,px);
+};
+const xmasPanelURL=()=>{
+  const w=48,h=48,px=new Uint8Array(w*h*4),P=(x,y,c)=>setPx(px,w,x,y,c);
+  for(let y=0;y<h;y++)for(let x=0;x<w;x++){
+    const q=hash(x,y,131);
+    let c=q<.30?'#0d2a21':(q<.62?'#0b241c':'#0f3027');
+    if((x+y)%16===0)c='#092018';
+    else if((x-y+96)%24===0)c='#123a2c';
+    if(q>.996)c='#dcecf7';
+    P(x,y,c);
+  }
+  return pngURL(w,h,px);
+};
+
 /* ---- 像素标题：把文字栅格化成硬边像素（需要 canvas，失败则保留普通文字） ---- */
 function pixText(text,size){
   try{
@@ -2296,6 +2569,11 @@ function buildDefs(){
   const root=document.documentElement.style;
   root.setProperty('--wood-url',`url(${woodURL()})`);
   root.setProperty('--parch-url',`url(${parchURL()})`);
+  root.setProperty('--xmas-url',`url(${xmasURL()})`);
+  root.setProperty('--garland-url',`url(${garlandURL()})`);
+  root.setProperty('--lights-url',`url(${lightsURL()})`);
+  root.setProperty('--wreath-url',`url(${wreathURL()})`);
+  root.setProperty('--xmas-panel-url',`url(${xmasPanelURL()})`);
 }
 function resetSprites(){
   for(const k in SPR) delete SPR[k];
@@ -2320,7 +2598,88 @@ function applySkin(){
   document.body.classList.toggle('winter',!!PREF.winter);
   resetSprites();
   resetTileArt();
+  snowApply();
   if(G) render(); else buildHero();
+}
+/* ---- 全屏像素飘雪：三层深浅、风力摆动、雪花闪烁 ---- */
+const SNOW={cv:null,ctx:null,fl:[],raf:0,last:0,w:0,h:0,on:false,rm:false};
+function snowFlake(init){
+  const z=Math.random();
+  return {x:Math.random()*(SNOW.w||innerWidth),y:init?Math.random()*(SNOW.h||innerHeight):-6-Math.random()*30,
+    z,r:z<.4?1:(z<.7?2:(z<.9?3:4)),vy:14+44*z,sw:6+20*z,ph:Math.random()*6.283,sp:.5+Math.random()*1.2,
+    spark:z>.78&&Math.random()<.32};
+}
+function snowStop(){if(SNOW.raf)cancelAnimationFrame(SNOW.raf);SNOW.raf=0}
+function snowResize(rebuild){
+  const cv=SNOW.cv,ctx=SNOW.ctx;if(!cv||!ctx)return;
+  const dpr=Math.min(2,window.devicePixelRatio||1);
+  SNOW.w=innerWidth;SNOW.h=innerHeight;
+  cv.width=Math.max(1,Math.round(SNOW.w*dpr));cv.height=Math.max(1,Math.round(SNOW.h*dpr));
+  ctx.setTransform(dpr,0,0,dpr,0,0);ctx.imageSmoothingEnabled=false;
+  if(rebuild||!SNOW.fl.length){
+    const n=Math.max(60,Math.min(300,Math.round(SNOW.w*SNOW.h/5200)));
+    SNOW.fl=[];for(let i=0;i<n;i++)SNOW.fl.push(snowFlake(true));
+  }
+  if(SNOW.rm)snowStill();
+}
+function snowDraw(f,t){
+  const ctx=SNOW.ctx,x=f.x|0,y=f.y|0;
+  ctx.globalAlpha=.3+f.z*.6;
+  ctx.fillStyle=f.z<.4?'#a9c7df':(f.z<.78?'#d9eaf7':'#fbfdff');
+  ctx.fillRect(x,y,f.r,f.r);
+  if(f.z>.68){ctx.globalAlpha=.28+f.z*.34;ctx.fillRect(x-1,y+1,1,1);ctx.fillRect(x+f.r,y+1,1,1)}
+  if(f.spark){ctx.globalAlpha=.22+.34*(.5+.5*Math.sin(t*.004+f.ph));ctx.fillStyle='#fff3cf';ctx.fillRect(x-1,y+1,1,f.r+2);ctx.fillRect(x+1,y,1,f.r)}
+  ctx.globalAlpha=1;
+}
+function snowStill(){
+  const ctx=SNOW.ctx;if(!ctx)return;
+  ctx.clearRect(0,0,SNOW.w,SNOW.h);
+  SNOW.fl.forEach(f=>snowDraw(f,0));
+}
+function snowStep(t){
+  SNOW.raf=0;
+  const dt=Math.min(.05,SNOW.last?(t-SNOW.last)/1000:.016);
+  SNOW.last=t;
+  const ctx=SNOW.ctx,w=SNOW.w,h=SNOW.h;
+  if(!ctx){return}
+  ctx.clearRect(0,0,w,h);
+  const wind=Math.sin(t*.00035)*16+Math.sin(t*.00013+1.7)*10;
+  for(const f of SNOW.fl){
+    f.y+=f.vy*dt*(f.z>.8?1.25:1);
+    f.x+=(wind*(.25+f.z)+Math.sin(t*.001*f.sp+f.ph)*f.sw)*dt;
+    if(f.y>h+8){const n=snowFlake(false);f.x=n.x;f.y=n.y;f.z=n.z;f.r=n.r;f.vy=n.vy;f.sw=n.sw;f.ph=n.ph;f.sp=n.sp;f.spark=n.spark;continue}
+    if(f.x<-14)f.x+=w+24;else if(f.x>w+14)f.x-=w+24;
+    snowDraw(f,t);
+  }
+  SNOW.raf=requestAnimationFrame(snowStep);
+}
+function snowApply(){
+  const host=$('snowfx');if(!host)return;
+  if(!PREF.winter){SNOW.on=false;snowStop();if(SNOW.ctx)SNOW.ctx.clearRect(0,0,SNOW.w,SNOW.h);return}
+  if(!SNOW.cv){
+    const cv=document.createElement('canvas');
+    cv.setAttribute('aria-hidden','true');
+    host.appendChild(cv);SNOW.cv=cv;SNOW.ctx=cv.getContext('2d');
+  }
+  SNOW.rm=!!(window.matchMedia&&matchMedia('(prefers-reduced-motion: reduce)').matches);
+  SNOW.on=true;
+  snowResize(true);
+  if(SNOW.rm)return;
+  if(!SNOW.raf){SNOW.last=0;SNOW.raf=requestAnimationFrame(snowStep)}
+}
+let snowRzT=0;
+window.addEventListener('resize',()=>{
+  if(!SNOW.on)return;
+  clearTimeout(snowRzT);snowRzT=setTimeout(()=>snowResize(true),180);
+});
+document.addEventListener('visibilitychange',()=>{
+  if(!SNOW.on)return;
+  if(document.hidden)snowStop();
+  else if(!SNOW.rm&&!SNOW.raf&&PREF.winter){SNOW.last=0;SNOW.raf=requestAnimationFrame(snowStep)}
+});
+if(window.matchMedia){
+  const snowMq=matchMedia('(prefers-reduced-motion: reduce)');
+  if(snowMq.addEventListener)snowMq.addEventListener('change',()=>{if(SNOW.on)snowApply()});
 }
 function useS(k,cx,cy,extra){return `<use href="#s-${k}" x="${(cx-SZ[k][0]/2).toFixed(1)}" y="${(cy-SZ[k][1]/2).toFixed(1)}"${extra||''}/>`}
 const SHEETS=[["A", "B", "C", "D"], ["E", "F", "G", "H"], ["I", "J", "K", "L"], ["M", "N", "O", "P"], ["Q", "R", "S", "T"], ["U", "V", "W", "X"], ["Ia", "Ib", "Ic", "Id"], ["Ie", "If", "Ig", "Ih"], ["Ii", "Ij", "Ka", "Kb"], ["Il", "Im", "In", "Io"], ["Ip", "Iq", "HA", "HB"], ["HC", "HD", "HE", "HF"], ["HG", "HH", "HI", "HJ"], ["HK", "HL", "HM", "HN"], ["HO", "HP", "HQ", "HR"], ["HS", "HT", "HU", "HV"], ["HW", "HX", "Rv1", "Rv2"], ["Rv3", "Rv4", "Rv5", "Rv6"], ["Rv7", "Rv8", "Rv9", "Rv10"], ["Rv11", "Rv12", "Fa", "Fb"], ["Fc", "Fd", "Fe", "Ff"], ["Fg", "Fh", "Ga", "Gb"], ["Gc", "Gd", "Ge", "Gf"], ["Gg", "Gh", "Ma", "Mb"], ["Mc", "Md", "Me", "Mf"], ["Mg", "Mh", "Ca", "Cb"], ["Cc", "Cd", "Ce", "Cf"], ["gE", "gH", "gI", "gM"], ["gN", "gR", "gU", "gV"], ["Fla", "Flb", "Flc", "Fld"], ["Fle", "Flf", "Flg", "Flh"]];
@@ -2802,7 +3161,7 @@ function festList(){
 function phantomOpts(){
   if(!has('phantom')||!G.pos||G.players[G.turn].phantom<1) return [];
   const [x,y]=G.pos,t=G.board[x+','+y],out=[];
-  t.feats.forEach((f,i)=>{if(f.nm||f.garden)return;if(f.kind==='field'&&!G.cfg.farmers)return;if(comp(x,y,i).meeples.length)return;out.push({x,y,fi:i})});
+  t.feats.forEach((f,i)=>{if(f.nm||f.garden)return;if(comp(x,y,i).meeples.length)return;out.push({x,y,fi:i})});
   return out;
 }
 function doFest(i){
@@ -2869,10 +3228,9 @@ function doPlace(x,y,rot){
   const mineNow=!REPLAY&&canAct();
   if(!REPLAY){
     const far=G.opts.some(o=>o.x!==x||o.y!==y);
-    if(mineNow&&far) fitView(true);
-    else if(mineNow&&isCoarse()&&!V.user) focusTile(x,y);
-    else if(!V.user) fitView(true);
-    else ensureVisible(x,y);
+    if(V.user) ensureVisible(x,y);
+    else if(mineNow&&far) fitView(true);
+    else followTile(x,y);
   }
   G.pre=[];
   if(has('gold')&&tile.gold){G.ingot[x+','+y]=(G.ingot[x+','+y]||0)+1;G.pre.push('gold')}
@@ -3402,6 +3760,7 @@ function applyAct(a){
 }
 function restoreGame(seed,cfg,acts){
   REPLAY=true;
+  cfg=Object.assign({},cfg,{farmers:true});
   try{
     G=freshState(seed,MODE,ME,cfg);startTurn();
     for(const a of acts){if(!applyAct(a)){console.warn('replay mismatch');break}}
@@ -4574,14 +4933,6 @@ function fitView(animate){
   if(Math.abs(tx-V.tx)<.4&&Math.abs(ty-V.ty)<.4&&Math.abs(f.k-V.k)<.0006) return;
   animateView(tx,ty,f.k,!animate);
 }
-function focusTile(x,y){
-  const r=svg.getBoundingClientRect();
-  if(!r.width||!r.height) return;
-  V.user=false;
-  const k=clamp(Math.min(r.width,r.height)*.58/100,.9,2.4);
-  animateView(r.width/2-(x*100+50)*k,r.height/2-(y*100+50)*k,k,false);
-}
-/* 自动跟随：可见就不动；不可见时优先保持玩家缩放置做最小平移，只有缩放过大放不下才轻拉远 */
 function revealTile(x,y,animate){
   const r=svg.getBoundingClientRect();
   if(!r.width||!r.height) return;
@@ -4597,6 +4948,22 @@ function revealTile(x,y,animate){
   if(l<p) tx+=p-l;else if(l+s>r.width-p) tx-=l+s-(r.width-p);
   if(t<p) ty+=p-t;else if(t+s>r.height-p) ty-=t+s-(r.height-p);
   if(tx!==V.tx||ty!==V.ty) animateView(tx,ty,V.k,!animate);
+}
+/* 落子跟随镜头：略放大并朝新地块偏移，新地块始终留在边距内 */
+function followTile(x,y){
+  const r=svg.getBoundingClientRect();
+  if(!r.width||!r.height) return;
+  const f=fitLevel();
+  if(!f) return;
+  const p=viewPad(r.width,r.height);
+  const k=clamp(f.k*1.2,.5,1.15);
+  const gx=x*100+50,gy=y*100+50;
+  const cx=f.cx+(gx-f.cx)*.45,cy=f.cy+(gy-f.cy)*.45;
+  let tx=r.width/2-cx*k,ty=r.height/2-cy*k;
+  const s=100*k,l=tx+x*100*k,t=ty+y*100*k;
+  if(l<p) tx+=p-l;else if(l+s>r.width-p) tx-=l+s-(r.width-p);
+  if(t<p) ty+=p-t;else if(t+s>r.height-p) ty-=t+s-(r.height-p);
+  animateView(tx,ty,k,false);
 }
 function ensureVisible(x,y){revealTile(x,y,true)}
 /* resize 软适配：棋盘中心还在可视区就保留玩家视角，避免浏览器地址栏伸缩重置缩放 */
@@ -4629,7 +4996,7 @@ function fieldMaskId(key,fi){
   MASKD[k]=1;return id;
 }
 function farmHTML(){
-  if(!PREF.showFarm||!G.cfg.farmers) return '';
+  if(!PREF.showFarm) return '';
   let h='';const seen=new Set();
   for(const m of (G.animMeeples||G.meeples)){
     if(m.b||m.pig||m.ab) continue;
@@ -4800,7 +5167,7 @@ function playersHTML(style){
   }).join('');
 }
 function cfgText(c){
-  const a=[c.farmers?'农夫计分：开':'农夫计分：关'];
+  const a=[];
   a.push(c.limit?`每回合 ${c.limit} 秒，剩 ${c.warn} 秒提醒${c.timeout==='auto'?'，超时自动落子':''}`:'不限时');
   const names=EXPS.filter(e=>c.exps.indexOf(e.id)>=0).map(e=>e.name);
   a.push(names.length?'扩展：'+names.join('、'):'无扩展包');
@@ -4821,7 +5188,7 @@ function hintText(){
   const phs={gold:'金矿：把第二个金锭放在相邻（含斜角）的任意地块上。',magic:'选择法师或女巫，再点一个未完成的城市或道路放置。',fplace:'放置渡口：依次点两条道路的端点把它们连通。',fmove:'可以移动靠近新地块的渡口：先点该湖泊地块，再依次点两条道路端点；也可以不移动。',bridge:'架设桥梁：先点发光的地块（新地块或上下左右相邻），再依次点两个道路端点把它连通；每回合最多一座。',castle:'城堡：选择改建成城堡（本次不计分，之后相邻要素完成时按基础分结算），或正常计分。',bzpick:'集市：点一张牌挑走（或按 1–3），先由当前玩家挑，再由对手挑；挑完后各自放置。',cchoice:'麦田怪圈：选择 A（增加随从）或 B（撤回随从），双方都要执行。',cact:G.cchoice==='A'?'麦田怪圈：点一个已有你同类随从的要素，增加一个随从。':'麦田怪圈：点一个你的同类随从，把它撤回。',fest:'节日：点一个自己的随从收回；也可以取消后正常放随从。',phantom:'幽灵：点新地块上的空闲领地放幽灵，或点「不放幽灵」。'};
   if(phs[G.phase]) return phs[G.phase];
   const portal=false;
-  const f=G.cfg.farmers?'（躺着的是农夫，终局才计分）':'';
+  const f='（躺着的是农夫，终局才计分）';
   const pt=portal?'传送门：棋盘上任何空闲的未完成要素都可以放。':'';
   return pt+(touch?`点选圆圈放随从${f}，再按「放置随从」；不想放就点「不放随从」。`:`点选圆圈放随从${f}；不想放就点「不放随从」。`);
 }
@@ -5196,7 +5563,6 @@ function renderStats(){
   let h=`<div class="stHead"><span></span><b style="--pc:${PCOL[0]}">${P[0].name}</b><b style="--pc:${PCOL[1]}">${P[1].name}</b></div>`;
   h+=sec('得分构成');
   [['city','城市'],['road','道路'],['mon','修道院'],['field','农田']].forEach(([k,n])=>{
-    if(k==='field'&&!G.cfg.farmers&&!(sc[0].field||sc[1].field)) return;
     h+=stRow(n,sc[0][k]||0,sc[1][k]||0);
   });
   const gp=[s[0].goodsPts||0,s[1].goodsPts||0],gg=[s[0].goldPts||0,s[1].goldPts||0];
@@ -5285,6 +5651,7 @@ function enterGameUI(){
   if(G.over) showEnd();
 }
 function startGame(seed,cfg){
+  cfg=Object.assign({},cfg,{farmers:true});
   G=freshState(seed,MODE,ME,cfg);
   addLog('对局开始');addLog(`抛硬币：${G.players[G.first].name}先手`);
   startTurn();
@@ -5309,7 +5676,7 @@ function focusKeys(keys){
   V.user=false;
   animateView(r.width/2-(x0+x1+1)/2*100*k,r.height/2-(y0+y1+1)/2*100*k,k,false);
 }
-function syncFarmBtn(){const b=$('farmBtn');if(b){b.classList.toggle('on',!!PREF.showFarm);b.hidden=!(G&&G.cfg&&G.cfg.farmers)||!$('lobby').hidden}}
+function syncFarmBtn(){const b=$('farmBtn');if(b){b.classList.toggle('on',!!PREF.showFarm);b.hidden=!G||!$('lobby').hidden}}
 function syncFinalBtn(){$$('[data-act="finalFast"]').forEach(b=>b.classList.toggle('on',FIN.fast))}
 function startFinalShow(){
   const steps=G.finalSteps||[];
@@ -5432,7 +5799,7 @@ function readCfg(){
   const sel=$('cfgLimit').value;
   const limit=sel==='custom'?clamp(parseInt($('cfgCustom').value,10)||45,10,900):parseInt(sel,10)||0;
   const exps=$$('#expList input').filter(i=>i.checked).map(i=>i.getAttribute('data-exp'));
-  return {farmers:$('cfgFarm').checked,limit,warn:Math.min(parseInt($('cfgWarn').value,10)||10,Math.max(limit-1,1)),timeout:$('cfgTimeout').value,exps};
+  return {farmers:true,limit,warn:Math.min(parseInt($('cfgWarn').value,10)||10,Math.max(limit-1,1)),timeout:$('cfgTimeout').value,exps};
 }
 function syncCfgUI(){
   const sel=$('cfgLimit').value;
@@ -5440,7 +5807,7 @@ function syncCfgUI(){
   const off=sel==='0';
   $('fldWarn').classList.toggle('off',off);$('fldTimeout').classList.toggle('off',off);
 }
-function saveCfgUI(){LS.set('kks-cfg',{farm:$('cfgFarm').checked,limit:$('cfgLimit').value,custom:$('cfgCustom').value,warn:$('cfgWarn').value,timeout:$('cfgTimeout').value,exps:readCfg().exps})}
+function saveCfgUI(){LS.set('kks-cfg',{limit:$('cfgLimit').value,custom:$('cfgCustom').value,warn:$('cfgWarn').value,timeout:$('cfgTimeout').value,exps:readCfg().exps})}
 function renderExpUI(){
   const c=LS.get('kks-cfg')||{},on=c.exps||[];
   $('expList').innerHTML=EXPS.filter(e=>e.status==='ready').map(e=>
@@ -5450,7 +5817,6 @@ function renderExpUI(){
 function loadCfgUI(){
   const c=LS.get('kks-cfg');
   if(c){
-    $('cfgFarm').checked=c.farm!==false;
     if(c.limit) $('cfgLimit').value=c.limit;
     if(c.custom) $('cfgCustom').value=c.custom;
     if(c.warn) $('cfgWarn').value=c.warn;
@@ -5491,11 +5857,12 @@ function buildHero(){
 /* ---------- 启动 ---------- */
 buildDefs();
 document.body.classList.toggle('winter',!!PREF.winter);
+snowApply();
 $('prefWinter').checked=!!PREF.winter;
 $('prefWinter2').checked=!!PREF.winter;
 buildHero();
 loadCfgUI();
-['cfgFarm','cfgLimit','cfgCustom','cfgWarn','cfgTimeout'].forEach(id=>$(id).addEventListener('change',()=>{syncCfgUI();saveCfgUI()}));
+['cfgLimit','cfgCustom','cfgWarn','cfgTimeout'].forEach(id=>$(id).addEventListener('change',()=>{syncCfgUI();saveCfgUI()}));
 $('expList').addEventListener('change',saveCfgUI);
 $('btnHost').onclick=hostRoom;
 $('btnJoin').onclick=joinRoom;
