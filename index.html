@@ -5346,10 +5346,10 @@ function renderBoard(){
   for(const m of (G.animMeeples||G.meeples)){
     if(m.cs) continue;
     const f=G.board[m.x+','+m.y].feats[m.fi];
-    if(m.ab) mp+=`<g${m===G.fx.meeple?' id="lastMeeple"':''} transform="translate(${(m.x*100+f.ax).toFixed(1)} ${(m.y*100+f.ay).toFixed(1)}) scale(${snoopyOn() ? 0.68 : 1.1})"><g>${useS(spk('a',m.p),0,0)}</g></g>`;
+    if(m.ab) mp+=`<g${m===G.fx.meeple?' id="lastMeeple"':''} transform="translate(${(m.x*100+f.ax).toFixed(1)} ${(m.y*100+f.ay).toFixed(1)}) scale(${snoopyOn() ? 0.78 : 1.1})"><g>${useS(spk('a',m.p),0,0)}</g></g>`;
     else if(m.b||m.pig){
       const bdx=m.b?(snoopyOn()?21:13):-13,bdy=m.b?(snoopyOn()?4:-6):10;
-      mp+=`<g${m===G.fx.meeple?' id="lastMeeple"':''} transform="translate(${(m.x*100+f.ax+bdx).toFixed(1)} ${(m.y*100+f.ay+bdy).toFixed(1)})${snoopyOn()&&m.b?' scale(.5)':''}"><g>${useS(spk(m.b?'b':'p',m.p),0,0)}</g></g>`;
+      mp+=`<g${m===G.fx.meeple?' id="lastMeeple"':''} transform="translate(${(m.x*100+f.ax+bdx).toFixed(1)} ${(m.y*100+f.ay+bdy).toFixed(1)})${snoopyOn()&&m.b?' scale(.78)':''}"><g>${useS(spk(m.b?'b':'p',m.p),0,0)}</g></g>`;
     }
     else if(m.pm) mp+=`<g${m===G.fx.meeple?' id="lastMeeple"':''} transform="translate(${(m.x*100+f.ax).toFixed(1)} ${(m.y*100+f.ay).toFixed(1)})${snoopyOn()?' scale(.88)':''}">${f.kind==='field'?`<g transform="rotate(90)">${useS(phk(m.p),0,0)}</g>`:useS(phk(m.p),0,0)}</g>`;
     else mp+=meepleG(m.p,m.x*100+f.ax,m.y*100+f.ay,snoopyOn()?(m.big?1.13:.78):(m.big?1.3:.9),f.kind==='field',null,m===G.fx.meeple?'lastMeeple':'',f.kind);
@@ -5414,7 +5414,7 @@ function renderOverlay(){
       const f=nodeFeat(n),sel=G.chooseN===ni,far=n.x!==px0||n.y!==py0,g0=n.figs[0];
       const u=useS(g0==='b'||g0==='p'||g0==='a'?spk(g0,G.turn):(g0==='fly'||g0==='flyb')?'fly':fk(f.kind,G.turn),0,0);
       const lying=f.kind==='field'&&(g0==='m'||g0==='big');
-      h+=`<g class="anc${sel?' sel':''}" data-n="${ni}" transform="translate(${(n.x*100+f.ax).toFixed(1)} ${(n.y*100+f.ay).toFixed(1)}) scale(${g0==='big'?(snoopyOn()?1.1:1.25):(g0==='a'||g0==='b')?(snoopyOn()?0.61:0.9):(snoopyOn()?0.78:0.9)})"><circle class="ancC" r="${far?13:15}"/><g opacity="${sel?1:.88}">${lying?`<g transform="rotate(90)">${u}</g>`:u}</g>${n.figs.length>1?'<circle cx="11" cy="-11" r="5" fill="#b13a2a" stroke="#2b1d14" stroke-width="1.5"/>':''}</g>`;
+      h+=`<g class="anc${sel?' sel':''}" data-n="${ni}" transform="translate(${(n.x*100+f.ax).toFixed(1)} ${(n.y*100+f.ay).toFixed(1)}) scale(${g0==='big'?(snoopyOn()?1.1:1.25):(snoopyOn()?0.78:0.9)})"><circle class="ancC" r="${far?13:15}"/><g opacity="${sel?1:.88}">${lying?`<g transform="rotate(90)">${u}</g>`:u}</g>${n.figs.length>1?'<circle cx="11" cy="-11" r="5" fill="#b13a2a" stroke="#2b1d14" stroke-width="1.5"/>':''}</g>`;
     });
   }
   if(canAct()){
@@ -6049,7 +6049,7 @@ function drawFinalStep(st){
     st.meeples.forEach(m=>{
       const f=G.board[m.x+','+m.y].feats[m.fi],key=m.ab?spk('a',m.p):m.b?spk('b',m.p):m.pig?spk('p',m.p):fk(f.kind,m.p);
       const lying=f.kind==='field'&&!m.b&&!m.pig&&!m.ab,u=useS(key,0,0);
-      h+=`<g class="finM" transform="translate(${(m.x*100+f.ax+(m.b?(snoopyOn()?21:13):m.pig?-13:0)).toFixed(1)} ${(m.y*100+f.ay).toFixed(1)}) scale(${m.big?1.6:1.25*(snoopyOn()&&(m.ab||m.b) ? 0.7 : 1)})">${lying?`<g transform="rotate(90)">${u}</g>`:u}</g>`;
+      h+=`<g class="finM" transform="translate(${(m.x*100+f.ax+(m.b?(snoopyOn()?21:13):m.pig?-13:0)).toFixed(1)} ${(m.y*100+f.ay).toFixed(1)}) scale(${m.big?1.6:1.25})">${lying?`<g transform="rotate(90)">${u}</g>`:u}</g>`;
     });
     let sx=0,sy=0;st.tiles.forEach(k=>{const p=k.split(',').map(Number);sx+=p[0];sy+=p[1]});
     const cx=sx/st.tiles.length*100+50,cy=sy/st.tiles.length*100+30;
